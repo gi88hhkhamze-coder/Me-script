@@ -1,1 +1,356 @@
+repeat task.wait() until game:IsLoaded()
 
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local MarketplaceService = game:GetService("MarketplaceService")
+local Stats = game:GetService("Stats")
+local player = Players.LocalPlayer
+
+local ACCENT = Color3.fromRGB(91, 61, 245)
+local BTN = Color3.fromRGB(40, 46, 80)
+local BLUE = Color3.fromRGB(60, 130, 255)
+
+local function mountGui(g)
+	local tries = {
+		function() return gethui() end,
+		function() return game:GetService("CoreGui") end,
+		function() return player:WaitForChild("PlayerGui", 5) end,
+	}
+	for _, f in ipairs(tries) do
+		local ok, parent = pcall(f)
+		if ok and parent then
+			local ok2 = pcall(function() g.Parent = parent end)
+			if ok2 and g.Parent then return true end
+		end
+	end
+	return false
+end
+
+local function getExecutor()
+	local ok, name = pcall(function()
+		if identifyexecutor then return (identifyexecutor()) end
+		if getexecutorname then return getexecutorname() end
+	end)
+	if ok and name and tostring(name) ~= "" then return tostring(name) end
+	return "غير معروف"
+end
+
+local function getPing()
+	local ok, v = pcall(function()
+		return Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+	end)
+	if ok and v then return math.floor(v) end
+	local ok2, p = pcall(function() return player:GetNetworkPing() end)
+	if ok2 and p then return math.floor(p * 1000) end
+	return nil
+end
+
+local function runMenu()
+	pcall(function()
+		if _G.__MenuGui then _G.__MenuGui:Destroy() end
+	end)
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "KillTest"
+	gui.ResetOnSpawn = false
+	gui.DisplayOrder = 1000
+	gui.IgnoreGuiInset = true
+	mountGui(gui)
+	_G.__MenuGui = gui
+
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 160, 0, 40)
+	btn.Position = UDim2.new(0.5, -80, 0, 8)
+	btn.Text = "إيقاف إجباري"
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 16
+	btn.BackgroundColor3 = Color3.fromRGB(200, 40, 50)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.ZIndex = 200
+	btn.Visible = false
+	btn.Parent = gui
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+	btn.MouseButton1Click:Connect(function()
+		gui:Destroy()
+	end)
+
+	local killToken = 0
+	local function showKill()
+		killToken += 1
+		local my = killToken
+		btn.Visible = true
+		task.delay(5, function()
+			if killToken == my and btn.Parent then
+				btn.Visible = false
+			end
+		end)
+	end
+	showKill()
+
+	local ok, err = pcall(function()
+		local main = Instance.new("Frame")
+		main.Size = UDim2.new(0.91, 0, 0.82, 0)
+		main.Position = UDim2.new(0.045, 0, 0.14, 0)
+		main.BackgroundColor3 = Color3.fromRGB(24, 28, 50)
+		main.Parent = gui
+		Instance.new("UICorner", main).CornerRadius = UDim.new(0, 16)
+		local stroke = Instance.new("UIStroke", main)
+		stroke.Color = ACCENT
+		stroke.Thickness = 2
+
+		local openBtn = Instance.new("TextButton")
+		openBtn.Size = UDim2.fromOffset(56, 56)
+		openBtn.Position = UDim2.fromOffset(8, workspace.CurrentCamera.ViewportSize.Y / 2 - 28)
+		openBtn.Text = "☰"
+		openBtn.Font = Enum.Font.GothamBold
+		openBtn.TextSize = 26
+		openBtn.AutoButtonColor = false
+		openBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
+		openBtn.TextColor3 = Color3.new(1, 1, 1)
+		openBtn.ZIndex = 100
+		openBtn.Parent = gui
+		Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
+		local obStroke = Instance.new("UIStroke", openBtn)
+		obStroke.Color = Color3.new(1, 1, 1)
+		obStroke.Thickness = 2
+
+		local pressing, dragging, longHeld = false, false, false
+		local dragInput, startPos, btnStart
+		local pressId = 0
+
+		local function viewport()
+			return workspace.CurrentCamera.ViewportSize
+		end
+
+		openBtn.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Touch
+				or input.UserInputType == Enum.UserInputType.MouseButton1 then
+				pressing = true
+				dragging = false
+				longHeld = false
+				dragInput = input
+				startPos = input.Position
+				btnStart = openBtn.AbsolutePosition
+				pressId += 1
+				local myId = pressId
+				task.delay(4, function()
+					if pressing and not dragging and pressId == myId then
+						longHeld = true
+						showKill()
+					end
+				end)
+			end
+		end)
+
+		local c1 = UIS.InputChanged:Connect(function(input)
+			if not pressing then return end
+			if input == dragInput or input.UserInputType == Enum.UserInputType.MouseMovement then
+				local d = input.Position - startPos
+				if not dragging and d.Magnitude > 10 then
+					dragging = true
+				end
+				if dragging then
+					local vp = viewport()
+					local x = math.clamp(btnStart.X + d.X, 0, vp.X - 56)
+					local y = math.clamp(btnStart.Y + d.Y, 0, vp.Y - 56)
+					openBtn.Position = UDim2.fromOffset(x, y)
+				end
+			end
+		end)
+
+		local c2 = UIS.InputEnded:Connect(function(input)
+			if not pressing then return end
+			local same = input == dragInput
+				or (dragInput.UserInputType == Enum.UserInputType.MouseButton1
+					and input.UserInputType == Enum.UserInputType.MouseButton1)
+			if not same then return end
+			pressing = false
+			if dragging then
+				dragging = false
+			elseif not longHeld then
+				main.Visible = not main.Visible
+			end
+		end)
+
+		gui.Destroying:Connect(function()
+			c1:Disconnect()
+			c2:Disconnect()
+		end)
+
+		local side = Instance.new("ScrollingFrame")
+		side.Size = UDim2.new(0.28, 0, 1, 0)
+		side.BackgroundColor3 = Color3.fromRGB(16, 19, 36)
+		side.BorderSizePixel = 0
+		side.ScrollBarThickness = 4
+		side.Parent = main
+		Instance.new("UICorner", side).CornerRadius = UDim.new(0, 16)
+
+		local area = Instance.new("Frame")
+		area.Size = UDim2.new(0.68, 0, 0.92, 0)
+		area.Position = UDim2.new(0.30, 0, 0.04, 0)
+		area.BackgroundTransparency = 1
+		area.Parent = main
+
+		local header = Instance.new("TextLabel")
+		header.Size = UDim2.new(1, 0, 0, 36)
+		header.BackgroundTransparency = 1
+		header.Font = Enum.Font.GothamBold
+		header.TextSize = 26
+		header.TextColor3 = Color3.new(1, 1, 1)
+		header.TextXAlignment = Enum.TextXAlignment.Left
+		header.Text = "القائمة"
+		header.Parent = area
+
+		local line = Instance.new("Frame")
+		line.Size = UDim2.new(0, 70, 0, 4)
+		line.Position = UDim2.new(0, 0, 0, 38)
+		line.BackgroundColor3 = ACCENT
+		line.BorderSizePixel = 0
+		line.Parent = area
+		Instance.new("UICorner", line).CornerRadius = UDim.new(1, 0)
+
+		local content = Instance.new("TextLabel")
+		content.Size = UDim2.new(1, 0, 1, -52)
+		content.Position = UDim2.new(0, 0, 0, 52)
+		content.BackgroundTransparency = 1
+		content.Font = Enum.Font.Gotham
+		content.TextColor3 = Color3.fromRGB(225, 228, 245)
+		content.TextSize = 20
+		content.TextWrapped = true
+		content.TextXAlignment = Enum.TextXAlignment.Left
+		content.TextYAlignment = Enum.TextYAlignment.Top
+		content.Text = ""
+		content.Parent = area
+
+		local function makeBtn(text, x, y, w, h, parent)
+			local b = Instance.new("TextButton")
+			b.Size = UDim2.new(0, w, 0, h)
+			b.Position = UDim2.new(0, x, 0, y)
+			b.Text = text
+			b.Font = Enum.Font.GothamBold
+			b.TextSize = 16
+			b.BackgroundColor3 = BTN
+			b.TextColor3 = Color3.new(1, 1, 1)
+			b.Parent = parent
+			Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
+			return b
+		end
+
+		local function makePage()
+			local p = Instance.new("Frame")
+			p.Size = UDim2.new(1, 0, 1, -52)
+			p.Position = UDim2.new(0, 0, 0, 52)
+			p.BackgroundTransparency = 1
+			p.Visible = false
+			p.Parent = area
+			return p
+		end
+
+		local function makeText(parent, size, color, bold)
+			local l = Instance.new("TextLabel")
+			l.BackgroundTransparency = 1
+			l.Font = bold and Enum.Font.GothamBold or Enum.Font.Gotham
+			l.TextSize = size
+			l.TextColor3 = color
+			l.TextXAlignment = Enum.TextXAlignment.Left
+			l.TextWrapped = true
+			l.Parent = parent
+			return l
+		end
+
+		local stats = { speed = 16, jump = 50, gravity = workspace.Gravity }
+
+		local function applyStats()
+			local char = player.Character
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum.WalkSpeed = stats.speed
+				hum.UseJumpPower = true
+				hum.JumpPower = stats.jump
+			end
+			workspace.Gravity = stats.gravity
+		end
+
+		do
+			local char = player.Character
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				stats.speed = hum.WalkSpeed
+				stats.jump = hum.UseJumpPower and hum.JumpPower or 50
+			end
+		end
+		local ORIG = { speed = stats.speed, jump = stats.jump, gravity = stats.gravity }
+
+		local charConn = player.CharacterAdded:Connect(function()
+			task.wait(0.5)
+			applyStats()
+		end)
+
+		gui.Destroying:Connect(function()
+			charConn:Disconnect()
+			stats.speed, stats.jump, stats.gravity = ORIG.speed, ORIG.jump, ORIG.gravity
+			applyStats()
+		end)
+
+		local playerPage = Instance.new("ScrollingFrame")
+		playerPage.Size = UDim2.new(1, 0, 1, -52)
+		playerPage.Position = UDim2.new(0, 0, 0, 52)
+		playerPage.BackgroundTransparency = 1
+		playerPage.BorderSizePixel = 0
+		playerPage.ScrollBarThickness = 3
+		playerPage.CanvasSize = UDim2.new(0, 0, 0, 260)
+		playerPage.Visible = false
+		playerPage.Parent = area
+
+		local playerInfo = makeText(playerPage, 16, Color3.fromRGB(160, 168, 205), false)
+		playerInfo.Size = UDim2.new(1, 0, 0, 24)
+		playerInfo.Text = player.DisplayName .. "  @" .. player.Name
+
+		local valueLabels = {}
+
+		local function makeStepper(y, title, key, step, min, max)
+			local lbl = makeText(playerPage, 17, Color3.new(1, 1, 1), true)
+			lbl.Size = UDim2.new(0, 84, 0, 36)
+			lbl.Position = UDim2.new(0, 0, 0, y)
+			lbl.Text = title
+
+			local minus = makeBtn("-", 88, y, 36, 36, playerPage)
+			local val = makeText(playerPage, 17, Color3.fromRGB(255, 210, 110), true)
+			val.Size = UDim2.new(0, 56, 0, 36)
+			val.Position = UDim2.new(0, 128, 0, y)
+			val.TextXAlignment = Enum.TextXAlignment.Center
+			local plus = makeBtn("+", 188, y, 36, 36, playerPage)
+
+			local function refresh()
+				val.Text = string.format("%.0f", stats[key])
+			end
+			valueLabels[key] = refresh
+			refresh()
+
+			minus.MouseButton1Click:Connect(function()
+				stats[key] = math.max(min, stats[key] - step)
+				refresh()
+				applyStats()
+			end)
+			plus.MouseButton1Click:Connect(function()
+				stats[key] = math.min(max, stats[key] + step)
+				refresh()
+				applyStats()
+			end)
+		end
+
+		makeStepper(36, "السرعة", "speed", 8, 0, 200)
+		makeStepper(84, "النطة", "jump", 25, 0, 300)
+		makeStepper(132, "الجاذبية", "gravity", 20, 20, 300)
+
+		local resetBtn = makeBtn("إعادة الضبط", 0, 184, 160, 36, playerPage)
+		resetBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 50)
+		resetBtn.MouseButton1Click:Connect(function()
+			stats.speed, stats.jump, stats.gravity = ORIG.speed, ORIG.jump, ORIG.gravity
+			for _, refresh in pairs(valueLabels) do refresh() end
+			applyStats()
+		end)
