@@ -354,3 +354,611 @@ local function runMenu()
 			for _, refresh in pairs(valueLabels) do refresh() end
 			applyStats()
 		end)
+		local serverPage = makePage()
+
+		local info = makeText(serverPage, 18, Color3.fromRGB(225, 228, 245), false)
+		info.Size = UDim2.new(1, -100, 0, 56)
+		info.TextYAlignment = Enum.TextYAlignment.Top
+
+		local badge = Instance.new("TextLabel")
+		badge.Size = UDim2.new(0, 84, 0, 26)
+		badge.Position = UDim2.new(1, -84, 0, 0)
+		badge.BackgroundColor3 = ACCENT
+		badge.Font = Enum.Font.GothamBold
+		badge.TextColor3 = Color3.new(1, 1, 1)
+		badge.TextSize = 14
+		badge.Parent = serverPage
+		Instance.new("UICorner", badge).CornerRadius = UDim.new(0, 8)
+
+		local box = Instance.new("TextBox")
+		box.Size = UDim2.new(1, 0, 0, 40)
+		box.Position = UDim2.new(0, 0, 0, 66)
+		box.BackgroundColor3 = Color3.fromRGB(16, 19, 36)
+		box.Font = Enum.Font.Gotham
+		box.TextColor3 = Color3.new(1, 1, 1)
+		box.PlaceholderText = "اكتب اسم المستخدم"
+		box.PlaceholderColor3 = Color3.fromRGB(140, 145, 175)
+		box.Text = ""
+		box.TextSize = 18
+		box.ClearTextOnFocus = false
+		box.Parent = serverPage
+		Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
+
+		local joinBtn = makeBtn("دخول", 0, 114, 120, 40, serverPage)
+		joinBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
+
+		local status = makeText(serverPage, 16, Color3.fromRGB(255, 210, 110), false)
+		status.Size = UDim2.new(1, 0, 0, 44)
+		status.Position = UDim2.new(0, 0, 0, 162)
+		status.TextYAlignment = Enum.TextYAlignment.Top
+		status.Text = ""
+
+		joinBtn.MouseButton1Click:Connect(function()
+			local name = box.Text:gsub("%s", "")
+			if name == "" then
+				status.Text = "اكتب اسم المستخدم أول"
+				return
+			end
+			status.Text = "جاري البحث..."
+			local ok1, uid = pcall(function()
+				return Players:GetUserIdFromNameAsync(name)
+			end)
+			if not ok1 or not uid then
+				status.Text = "ما لقيت هذا المستخدم"
+				return
+			end
+			local ok2, cur, msg, pid, iid = pcall(function()
+				return TeleportService:GetPlayerPlaceInstanceAsync(uid)
+			end)
+			if not ok2 or not pid or not iid then
+				status.Text = "ما قدرت أدخل عليه. غالباً إعدادات الخصوصية عنده ما تسمح، أو هو مو داخل لعبة."
+				return
+			end
+			status.Text = "جاري الدخول..."
+			local ok3 = pcall(function()
+				TeleportService:TeleportToPlaceInstance(pid, iid, player)
+			end)
+			if not ok3 then
+				status.Text = "فشل الدخول"
+			end
+		end)
+
+		local settingsPage = makePage()
+
+		local colorBtn = makeBtn("لون الواجهة ▼", 0, 0, 170, 38, settingsPage)
+		local colorRow = Instance.new("Frame")
+		colorRow.Size = UDim2.new(1, 0, 0, 44)
+		colorRow.Position = UDim2.new(0, 0, 0, 44)
+		colorRow.BackgroundTransparency = 1
+		colorRow.Visible = false
+		colorRow.Parent = settingsPage
+
+		local transBtn = makeBtn("الشفافية ▼", 0, 100, 170, 38, settingsPage)
+		local transRow = Instance.new("Frame")
+		transRow.Size = UDim2.new(1, 0, 0, 44)
+		transRow.Position = UDim2.new(0, 0, 0, 144)
+		transRow.BackgroundTransparency = 1
+		transRow.Visible = false
+		transRow.Parent = settingsPage
+
+		local colors = {
+			Color3.fromRGB(24, 28, 50),
+			Color3.fromRGB(15, 15, 15),
+			Color3.fromRGB(60, 35, 110),
+			Color3.fromRGB(20, 70, 55),
+			Color3.fromRGB(25, 60, 120),
+			Color3.fromRGB(100, 30, 40),
+		}
+
+		for i, c in ipairs(colors) do
+			local s = makeBtn("", (i - 1) * 44, 4, 36, 36, colorRow)
+			s.BackgroundColor3 = c
+			s.MouseButton1Click:Connect(function()
+				main.BackgroundColor3 = c
+				side.BackgroundColor3 = c:Lerp(Color3.new(0, 0, 0), 0.4)
+			end)
+		end
+
+		for i, v in ipairs({ 0, 0.25, 0.5, 0.75 }) do
+			local t = makeBtn(math.floor(v * 100) .. "%", (i - 1) * 66, 4, 60, 36, transRow)
+			t.MouseButton1Click:Connect(function()
+				main.BackgroundTransparency = v
+				side.BackgroundTransparency = v
+			end)
+		end
+
+		colorBtn.MouseButton1Click:Connect(function()
+			colorRow.Visible = not colorRow.Visible
+		end)
+		transBtn.MouseButton1Click:Connect(function()
+			transRow.Visible = not transRow.Visible
+		end)
+
+		local devPage = makePage()
+
+		local avatar = Instance.new("ImageLabel")
+		avatar.Size = UDim2.new(0, 80, 0, 80)
+		avatar.BackgroundColor3 = BTN
+		avatar.Image = ""
+		avatar.Parent = devPage
+		Instance.new("UICorner", avatar).CornerRadius = UDim.new(0.5, 0)
+		local avStroke = Instance.new("UIStroke", avatar)
+		avStroke.Color = ACCENT
+		avStroke.Thickness = 2
+
+		local devName = makeText(devPage, 24, Color3.new(1, 1, 1), true)
+		devName.Size = UDim2.new(1, -96, 0, 30)
+		devName.Position = UDim2.new(0, 96, 0, 10)
+		devName.Text = "mrHamze"
+
+		local devUser = makeText(devPage, 17, Color3.fromRGB(160, 168, 205), false)
+		devUser.Size = UDim2.new(1, -96, 0, 24)
+		devUser.Position = UDim2.new(0, 96, 0, 42)
+		devUser.Text = "@gi88hhk"
+
+		local devNote = makeText(devPage, 15, Color3.fromRGB(255, 210, 110), true)
+		devNote.Size = UDim2.new(1, 0, 0, 24)
+		devNote.Position = UDim2.new(0, 0, 0, 90)
+		devNote.Text = ""
+
+		local function copyLink(link, statusLabel)
+			local copied = false
+			pcall(function()
+				if setclipboard then
+					setclipboard(link)
+					copied = true
+				elseif toclipboard then
+					toclipboard(link)
+					copied = true
+				end
+			end)
+			if copied then
+				statusLabel.TextColor3 = Color3.fromRGB(110, 230, 160)
+				statusLabel.Text = "تم نسخ الرابط"
+			else
+				statusLabel.TextColor3 = Color3.fromRGB(255, 210, 110)
+				statusLabel.Text = "النسخ مو مدعوم في المنفذ، هذا الرابط:\n" .. link
+			end
+		end
+
+		local d1 = makeBtn("نسخ رابط الدسكورد1", 0, 124, 210, 36, devPage)
+		d1.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+
+		local d2 = makeBtn("نسخ رابط الدسكورد2", 0, 168, 210, 36, devPage)
+		d2.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+
+		local copyStatus = makeText(devPage, 15, Color3.fromRGB(110, 230, 160), false)
+		copyStatus.Size = UDim2.new(1, 0, 0, 44)
+		copyStatus.Position = UDim2.new(0, 0, 0, 212)
+		copyStatus.TextYAlignment = Enum.TextYAlignment.Top
+		copyStatus.Text = ""
+
+		d1.MouseButton1Click:Connect(function()
+			copyLink("https://discord.gg/QHPCFfw4", copyStatus)
+		end)
+		d2.MouseButton1Click:Connect(function()
+			copyLink("https://discord.gg/AJAFJPAF7", copyStatus)
+		end)
+
+		local avatarLoaded = false
+		local function loadAvatar()
+			if avatarLoaded then return end
+			avatarLoaded = true
+			task.spawn(function()
+				local uid
+				for _, n in ipairs({ "gi88hhk", "mrHamze" }) do
+					local ok1, id = pcall(function()
+						return Players:GetUserIdFromNameAsync(n)
+					end)
+					if ok1 and id then
+						uid = id
+						break
+					end
+				end
+				if not uid then
+					devNote.Text = "ما قدرت أجيب الصورة"
+					avatarLoaded = false
+					return
+				end
+				local ok2, img = pcall(function()
+					return Players:GetUserThumbnailAsync(
+						uid,
+						Enum.ThumbnailType.HeadShot,
+						Enum.ThumbnailSize.Size150x150
+					)
+				end)
+				if ok2 and img then
+					avatar.Image = img
+				else
+					avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. uid .. "&w=150&h=150"
+				end
+			end)
+		end
+
+		local tabs = {
+			{ "اللاعب" },
+			{ "التنقل" },
+			{ "الصوت" },
+			{ "حول" },
+			{ "السيرفر" },
+			{ "الإعدادات" },
+			{ "المطور" },
+		}
+
+		local tabButtons = {}
+
+		local function show(t)
+			content.Visible = false
+			playerPage.Visible = false
+			serverPage.Visible = false
+			settingsPage.Visible = false
+			devPage.Visible = false
+			header.Text = t[1]
+
+			for name, b in pairs(tabButtons) do
+				b.BackgroundColor3 = (name == t[1]) and ACCENT or BTN
+			end
+
+			if t[1] == "اللاعب" then
+				playerPage.Visible = true
+			elseif t[1] == "السيرفر" then
+				serverPage.Visible = true
+				info.Text = "رقم الماب: " .. game.PlaceId
+					.. "\nرقم السيرفر: " .. string.sub(game.JobId, 1, 14)
+				badge.Text = "👥 " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers
+			elseif t[1] == "الإعدادات" then
+				settingsPage.Visible = true
+			elseif t[1] == "المطور" then
+				devPage.Visible = true
+				copyStatus.Text = ""
+				loadAvatar()
+			else
+				content.Visible = true
+			end
+		end
+
+		side.CanvasSize = UDim2.new(0, 0, 0, 16 + #tabs * 46)
+
+		for i, t in ipairs(tabs) do
+			local b = Instance.new("TextButton")
+			b.Size = UDim2.new(0.9, 0, 0, 38)
+			b.Position = UDim2.new(0.05, 0, 0, 8 + (i - 1) * 46)
+			b.Text = t[1]
+			b.Font = Enum.Font.GothamBold
+			b.TextSize = 17
+			b.BackgroundColor3 = BTN
+			b.TextColor3 = Color3.new(1, 1, 1)
+			b.Parent = side
+			Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
+			tabButtons[t[1]] = b
+			b.MouseButton1Click:Connect(function()
+				show(t)
+			end)
+		end
+
+		show(tabs[1])
+	end)
+
+	if not ok then
+		local e = Instance.new("TextLabel")
+		e.Size = UDim2.new(0.9, 0, 0, 120)
+		e.Position = UDim2.new(0.05, 0, 0.3, 0)
+		e.BackgroundColor3 = Color3.new(0, 0, 0)
+		e.TextColor3 = Color3.fromRGB(255, 90, 90)
+		e.TextWrapped = true
+		e.TextSize = 16
+		e.Text = "خطأ: " .. tostring(err)
+		e.Parent = gui
+	end
+end
+٨local GAMES = {
+	{ name = "تايم بومب",        place = "606849621",       url = "" },
+	{ name = "ام ام 2",              place = "142823291",       url = "" },
+    { name = "سرقت البيض	
+{ name = "Steal a Brainrot", place = "109983668079237", url = "" },
+}
+
+local cam = workspace.CurrentCamera
+
+local introGui = Instance.new("ScreenGui")
+introGui.Name = "IntroGui"
+introGui.ResetOnSpawn = false
+introGui.DisplayOrder = 900
+introGui.IgnoreGuiInset = true
+mountGui(introGui)
+
+local blur = Instance.new("BlurEffect")
+blur.Size = 10
+pcall(function() blur.Parent = Lighting end)
+
+local CAM_HEIGHT = 60
+local CAM_RADIUS = 95
+local center = Vector3.new(0, 0, 0)
+do
+	local char = player.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	if hrp then center = hrp.Position end
+end
+
+local angle = 0
+cam.CameraType = Enum.CameraType.Scriptable
+local camConn = RunService.RenderStepped:Connect(function(dt)
+	angle += dt * 0.15
+	local pos = center + Vector3.new(math.cos(angle) * CAM_RADIUS, CAM_HEIGHT, math.sin(angle) * CAM_RADIUS)
+	cam.CFrame = CFrame.lookAt(pos, center + Vector3.new(0, 10, 0))
+end)
+
+local function closeIntro()
+	pcall(function() camConn:Disconnect() end)
+	cam.CameraType = Enum.CameraType.Custom
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if hum then cam.CameraSubject = hum end
+	pcall(function() blur:Destroy() end)
+	pcall(function() introGui:Destroy() end)
+end
+
+introGui.Destroying:Connect(function()
+	pcall(function() camConn:Disconnect() end)
+	cam.CameraType = Enum.CameraType.Custom
+	pcall(function() blur:Destroy() end)
+end)
+
+local dim = Instance.new("Frame")
+dim.Size = UDim2.new(1, 0, 1, 0)
+dim.BackgroundColor3 = Color3.fromRGB(8, 12, 30)
+dim.BackgroundTransparency = 0.45
+dim.BorderSizePixel = 0
+dim.Parent = introGui
+local grad = Instance.new("UIGradient", dim)
+grad.Transparency = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 0.55),
+	NumberSequenceKeypoint.new(1, 0.1),
+})
+
+for i = 1, 16 do
+	local dot = Instance.new("Frame")
+	local s = math.random(4, 12)
+	dot.Size = UDim2.fromOffset(s, s)
+	dot.BackgroundColor3 = BLUE
+	dot.BackgroundTransparency = 0.4
+	dot.BorderSizePixel = 0
+	dot.Position = UDim2.new(math.random() * 0.6, 0, 1.05, 0)
+	dot.Parent = introGui
+	Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+	task.spawn(function()
+		task.wait(math.random() * 4)
+		while introGui.Parent do
+			local t = 5 + math.random() * 5
+			local x = math.random() * 0.6
+			dot.Position = UDim2.new(x, 0, 1.05, 0)
+			dot.BackgroundTransparency = 0.4
+			TweenService:Create(dot, TweenInfo.new(t, Enum.EasingStyle.Linear), {
+				Position = UDim2.new(x, 0, -0.1, 0),
+				BackgroundTransparency = 1,
+			}):Play()
+			task.wait(t)
+		end
+	end)
+end
+
+local panel = Instance.new("Frame")
+panel.Size = UDim2.new(0.36, 0, 0.78, 0)
+panel.Position = UDim2.new(0.61, 0, 0.11, 0)
+panel.BackgroundColor3 = Color3.fromRGB(14, 20, 44)
+panel.BackgroundTransparency = 0.1
+panel.Parent = introGui
+Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 24)
+local pStroke = Instance.new("UIStroke", panel)
+pStroke.Color = BLUE
+pStroke.Thickness = 3
+
+local runBtn = Instance.new("TextButton")
+runBtn.Size = UDim2.new(1, -20, 0, 52)
+runBtn.Position = UDim2.new(0, 10, 0, 10)
+runBtn.Text = "تشغيل سكربت جميع المابات"
+runBtn.Font = Enum.Font.GothamBold
+runBtn.TextSize = 18
+runBtn.TextWrapped = true
+runBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
+runBtn.TextColor3 = Color3.new(1, 1, 1)
+runBtn.Parent = panel
+Instance.new("UICorner", runBtn).CornerRadius = UDim.new(0, 16)
+
+local list = Instance.new("ScrollingFrame")
+list.Size = UDim2.new(1, -20, 1, -128)
+list.Position = UDim2.new(0, 10, 0, 72)
+list.BackgroundTransparency = 1
+list.BorderSizePixel = 0
+list.ScrollBarThickness = 3
+list.CanvasSize = UDim2.new(0, 0, 0, 0)
+list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+list.Parent = panel
+local lay = Instance.new("UIListLayout", list)
+lay.Padding = UDim.new(0, 8)
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(1, -20, 0, 38)
+closeBtn.Position = UDim2.new(0, 10, 1, -48)
+closeBtn.Text = "إغلاق"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 17
+closeBtn.BackgroundColor3 = Color3.fromRGB(60, 66, 100)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Parent = panel
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 14)
+
+local function makeCard(title, placeId)
+	local card = Instance.new("Frame")
+	card.Size = UDim2.new(1, -6, 0, 78)
+	card.BackgroundColor3 = Color3.fromRGB(22, 30, 62)
+	card.Parent = list
+	Instance.new("UICorner", card).CornerRadius = UDim.new(0, 16)
+	local cs = Instance.new("UIStroke", card)
+	cs.Color = BLUE
+	cs.Thickness = 1.5
+
+	local img = Instance.new("ImageLabel")
+	img.Size = UDim2.fromOffset(60, 60)
+	img.Position = UDim2.new(0, 9, 0.5, -30)
+	img.BackgroundColor3 = BTN
+	img.BorderSizePixel = 0
+	img.Image = placeId ~= "" and "rbxthumb://type=GameIcon&id=" .. placeId .. "&w=150&h=150" or ""
+	img.Parent = card
+	Instance.new("UICorner", img).CornerRadius = UDim.new(0, 12)
+
+	local name = Instance.new("TextLabel")
+	name.Size = UDim2.new(1, -150, 1, 0)
+	name.Position = UDim2.new(0, 78, 0, 0)
+	name.BackgroundTransparency = 1
+	name.Font = Enum.Font.GothamBold
+	name.TextSize = 16
+	name.TextColor3 = Color3.new(1, 1, 1)
+	name.TextXAlignment = Enum.TextXAlignment.Left
+	name.TextWrapped = true
+	name.Text = title
+	name.Parent = card
+
+	local run = Instance.new("TextButton")
+	run.Size = UDim2.fromOffset(62, 38)
+	run.Position = UDim2.new(1, -70, 0.5, -19)
+	run.Text = "تشغيل"
+	run.Font = Enum.Font.GothamBold
+	run.TextSize = 15
+	run.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
+	run.TextColor3 = Color3.new(1, 1, 1)
+	run.Parent = card
+	Instance.new("UICorner", run).CornerRadius = UDim.new(0, 12)
+	return run
+end
+
+local infoCard = Instance.new("Frame")
+infoCard.Size = UDim2.new(0.36, 0, 0.78, 0)
+infoCard.Position = UDim2.new(0.03, 0, 0.11, 0)
+infoCard.BackgroundColor3 = Color3.fromRGB(14, 20, 44)
+infoCard.BackgroundTransparency = 0.1
+infoCard.Parent = introGui
+Instance.new("UICorner", infoCard).CornerRadius = UDim.new(0, 24)
+local iStroke = Instance.new("UIStroke", infoCard)
+iStroke.Color = BLUE
+iStroke.Thickness = 3
+
+local function infoRow(y, label)
+	local l = Instance.new("TextLabel")
+	l.Size = UDim2.new(1, -28, 0, 20)
+	l.Position = UDim2.new(0, 14, 0, y)
+	l.BackgroundTransparency = 1
+	l.Font = Enum.Font.Gotham
+	l.TextSize = 15
+	l.TextColor3 = Color3.fromRGB(140, 160, 215)
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.Text = label
+	l.Parent = infoCard
+
+	local v = Instance.new("TextLabel")
+	v.Size = UDim2.new(1, -28, 0, 40)
+	v.Position = UDim2.new(0, 14, 0, y + 20)
+	v.BackgroundTransparency = 1
+	v.Font = Enum.Font.GothamBold
+	v.TextSize = 20
+	v.TextColor3 = Color3.new(1, 1, 1)
+	v.TextXAlignment = Enum.TextXAlignment.Left
+	v.TextYAlignment = Enum.TextYAlignment.Top
+	v.TextWrapped = true
+	v.Text = "..."
+	v.Parent = infoCard
+	return v
+end
+
+local mapVal = infoRow(10, "الماب")
+local execVal = infoRow(80, "الهاك")
+local pingVal = infoRow(150, "البنق")
+
+local statusLbl = Instance.new("TextLabel")
+statusLbl.Size = UDim2.new(1, -28, 0, 40)
+statusLbl.Position = UDim2.new(0, 14, 1, -48)
+statusLbl.BackgroundTransparency = 1
+statusLbl.Font = Enum.Font.Gotham
+statusLbl.TextSize = 14
+statusLbl.TextColor3 = Color3.fromRGB(255, 210, 110)
+statusLbl.TextXAlignment = Enum.TextXAlignment.Left
+statusLbl.TextYAlignment = Enum.TextYAlignment.Top
+statusLbl.TextWrapped = true
+statusLbl.Text = ""
+statusLbl.Parent = infoCard
+
+execVal.Text = getExecutor()
+mapVal.Text = game.Name
+
+task.spawn(function()
+	local ok, infoData = pcall(function()
+		return MarketplaceService:GetProductInfo(game.PlaceId)
+	end)
+	if ok and infoData and infoData.Name then
+		mapVal.Text = infoData.Name
+	end
+end)
+
+task.spawn(function()
+	while introGui.Parent do
+		local p = getPing()
+		if p then
+			pingVal.Text = p .. " ms"
+			if p < 80 then
+				pingVal.TextColor3 = Color3.fromRGB(110, 230, 160)
+			elseif p < 160 then
+				pingVal.TextColor3 = Color3.fromRGB(255, 210, 110)
+			else
+				pingVal.TextColor3 = Color3.fromRGB(255, 110, 110)
+			end
+		else
+			pingVal.Text = "-"
+		end
+		task.wait(1)
+	end
+end)
+
+local function runRemote(url)
+	if url == "" then
+		statusLbl.Text = "ضع رابط السكربت في قائمة GAMES"
+		return
+	end
+	statusLbl.Text = "جاري التحميل..."
+	task.spawn(function()
+		local ok, res = pcall(function()
+			return game:HttpGet(url)
+		end)
+		if not ok or not res or res == "" then
+			statusLbl.Text = "فشل تحميل الرابط"
+			return
+		end
+		local fn = loadstring(res)
+		if not fn then
+			statusLbl.Text = "السكربت فيه خطأ"
+			return
+		end
+		local ok2, e2 = pcall(fn)
+		if ok2 then
+			closeIntro()
+		else
+			statusLbl.Text = "خطأ: " .. tostring(e2)
+		end
+	end)
+end
+
+for _, g in ipairs(GAMES) do
+	local run = makeCard(g.name, g.place)
+	run.MouseButton1Click:Connect(function()
+		runRemote(g.url)
+	end)
+end
+
+local started = false
+runBtn.MouseButton1Click:Connect(function()
+	if started then return end
+	started = true
+	closeIntro()
+	runMenu()
+end)
+
+closeBtn.MouseButton1Click:Connect(closeIntro)
