@@ -651,10 +651,10 @@ local function runMenu()
 		e.Parent = gui
 	end
 end
-٨local GAMES = {
+local GAMES = {
 	{ name = "تايم بومب",        place = "606849621",       url = "" },
 	{ name = "ام ام 2",              place = "142823291",       url = "" },
-    { name = "سرقت البيض"          place = "142823291",      url = "" },	
+    { name = "سرقت البيض",          place = "107778070777162",      url = "" },	
 { name = "Steal a Brainrot", place = "109983668079237", url = "" },
 }
 
