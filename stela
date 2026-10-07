@@ -1,0 +1,534 @@
+repeat task.wait() until game:IsLoaded()
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local ACCENT = Color3.fromRGB(91, 61, 245)
+local BTN = Color3.fromRGB(40, 46, 80)
+local GREEN = Color3.fromRGB(40, 160, 80)
+local RED = Color3.fromRGB(200, 40, 50)
+
+local LOCATIONS = {
+	{ name = "اللوبي",       pos = Vector3.new(542.2,  73, -360.2) },
+	{ name = "منطقة 1",     pos = Vector3.new(614.4,  73, -365.0) },
+	{ name = "منطقة 2",     pos = Vector3.new(719.5,  73, -363.2) },
+	{ name = "منطقة 3 🏜️", pos = Vector3.new(888.4,  73, -362.6) },
+	{ name = "منطقة 4",     pos = Vector3.new(1143.5, 73, -363.8) },
+	{ name = "منطقة 5 ❄️", pos = Vector3.new(1415.2, 73, -367.2) },
+	{ name = "منطقة 6",     pos = Vector3.new(1792.1, 73, -371.7) },
+}
+
+local EGG_KEYWORDS = { "egg", "بيض" }
+
+local function isEgg(obj)
+	if not obj:IsA("BasePart") and not obj:IsA("Model") then return false end
+	local name = obj.Name:lower()
+	for _, kw in ipairs(EGG_KEYWORDS) do
+		if name:find(kw:lower()) then return true end
+	end
+	return false
+end
+
+local function getEggs()
+	local eggs = {}
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if isEgg(obj) then table.insert(eggs, obj) end
+	end
+	return eggs
+end
+
+local function getPos(obj)
+	if obj:IsA("BasePart") then return obj.Position end
+	if obj:IsA("Model") and obj.PrimaryPart then return obj.PrimaryPart.Position end
+	if obj:IsA("Model") then
+		local ok, cf = pcall(function() return obj:GetBoundingBox() end)
+		if ok then return cf.Position end
+	end
+	return nil
+end
+
+local function mountGui(g)
+	local tries = {
+		function() return gethui() end,
+		function() return game:GetService("CoreGui") end,
+		function() return player:WaitForChild("PlayerGui", 5) end,
+	}
+	for _, f in ipairs(tries) do
+		local ok, parent = pcall(f)
+		if ok and parent then
+			local ok2 = pcall(function() g.Parent = parent end)
+			if ok2 and g.Parent then return true end
+		end
+	end
+end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "EggGui"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 1000
+gui.IgnoreGuiInset = true
+mountGui(gui)
+
+local espGui = Instance.new("ScreenGui")
+espGui.Name = "EggESP"
+espGui.ResetOnSpawn = false
+espGui.DisplayOrder = 999
+espGui.IgnoreGuiInset = true
+mountGui(espGui)
+
+local killBtn = Instance.new("TextButton")
+killBtn.Size = UDim2.new(0, 150, 0, 38)
+killBtn.Position = UDim2.new(0.5, -75, 0, 8)
+killBtn.Text = "إيقاف إجباري"
+killBtn.Font = Enum.Font.GothamBold
+killBtn.TextSize = 15
+killBtn.BackgroundColor3 = RED
+killBtn.TextColor3 = Color3.new(1, 1, 1)
+killBtn.ZIndex = 200
+killBtn.Visible = false
+killBtn.Parent = gui
+Instance.new("UICorner", killBtn).CornerRadius = UDim.new(0, 10)
+killBtn.MouseButton1Click:Connect(function()
+	gui:Destroy()
+	espGui:Destroy()
+end)
+
+local killToken = 0
+local function showKill()
+	killToken += 1
+	local my = killToken
+	killBtn.Visible = true
+	task.delay(5, function()
+		if killToken == my and killBtn.Parent then
+			killBtn.Visible = false
+		end
+	end)
+end
+showKill()
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0.88, 0, 0.84, 0)
+main.Position = UDim2.new(0.06, 0, 0.13, 0)
+main.BackgroundColor3 = Color3.fromRGB(24, 28, 50)
+main.Visible = true
+main.Parent = gui
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 16)
+local stroke = Instance.new("UIStroke", main)
+stroke.Color = ACCENT
+stroke.Thickness = 2
+
+local tabBar = Instance.new("Frame")
+tabBar.Size = UDim2.new(1, 0, 0, 44)
+tabBar.BackgroundColor3 = Color3.fromRGB(16, 19, 36)
+tabBar.BorderSizePixel = 0
+tabBar.Parent = main
+Instance.new("UICorner", tabBar).CornerRadius = UDim.new(0, 16)
+local tabLayout = Instance.new("UIListLayout", tabBar)
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.Padding = UDim.new(0, 4)
+local tabPad = Instance.new("UIPadding", tabBar)
+tabPad.PaddingLeft = UDim.new(0, 4)
+tabPad.PaddingTop = UDim.new(0, 4)
+
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, 0, 1, -50)
+content.Position = UDim2.new(0, 0, 0, 50)
+content.BackgroundTransparency = 1
+content.Parent = main
+
+local function makeTabBtn(text)
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(0.5, -8, 0, 36)
+	b.BackgroundColor3 = BTN
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 14
+	b.Text = text
+	b.TextWrapped = true
+	b.Parent = tabBar
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
+	return b
+end
+
+local tabTp = makeTabBtn("🗺️ التنقل")
+local tabHidden = makeTabBtn("🔍 الأشياء المخفية")
+
+local tpPage = Instance.new("Frame")
+tpPage.Size = UDim2.new(1, -16, 1, -8)
+tpPage.Position = UDim2.new(0, 8, 0, 4)
+tpPage.BackgroundTransparency = 1
+tpPage.Parent = content
+
+local hiddenPage = Instance.new("Frame")
+hiddenPage.Size = UDim2.new(1, -16, 1, -8)
+hiddenPage.Position = UDim2.new(0, 8, 0, 4)
+hiddenPage.BackgroundTransparency = 1
+hiddenPage.Visible = false
+hiddenPage.Parent = content
+
+local function switchTab(page)
+	tpPage.Visible = page == tpPage
+	hiddenPage.Visible = page == hiddenPage
+	tabTp.BackgroundColor3 = page == tpPage and ACCENT or BTN
+	tabHidden.BackgroundColor3 = page == hiddenPage and ACCENT or BTN
+end
+
+tabTp.MouseButton1Click:Connect(function() switchTab(tpPage) end)
+tabHidden.MouseButton1Click:Connect(function() switchTab(hiddenPage) end)
+switchTab(tpPage)
+
+local tpStatus = Instance.new("TextLabel")
+tpStatus.Size = UDim2.new(1, 0, 0, 24)
+tpStatus.BackgroundTransparency = 1
+tpStatus.Font = Enum.Font.Gotham
+tpStatus.TextSize = 14
+tpStatus.TextColor3 = Color3.fromRGB(255, 210, 110)
+tpStatus.TextXAlignment = Enum.TextXAlignment.Left
+tpStatus.Text = ""
+tpStatus.Parent = tpPage
+
+local scroll = Instance.new("ScrollingFrame")
+scroll.Size = UDim2.new(1, 0, 1, -28)
+scroll.Position = UDim2.new(0, 0, 0, 26)
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+scroll.ScrollBarThickness = 3
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scroll.Parent = tpPage
+local lay = Instance.new("UIListLayout", scroll)
+lay.Padding = UDim.new(0, 8)
+
+local function teleport(pos)
+	local char = player.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		hrp.CFrame = CFrame.new(pos)
+		tpStatus.Text = "تم التنقل ✓"
+		task.delay(2, function()
+			if tpStatus.Parent then tpStatus.Text = "" end
+		end)
+	else
+		tpStatus.Text = "ما قدر يتنقل"
+	end
+end
+
+for _, loc in ipairs(LOCATIONS) do
+	local card = Instance.new("Frame")
+	card.Size = UDim2.new(1, -6, 0, 52)
+	card.BackgroundColor3 = Color3.fromRGB(30, 36, 62)
+	card.Parent = scroll
+	Instance.new("UICorner", card).CornerRadius = UDim.new(0, 12)
+	local cs = Instance.new("UIStroke", card)
+	cs.Color = ACCENT
+	cs.Thickness = 1.2
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(1, -100, 1, 0)
+	lbl.Position = UDim2.new(0, 12, 0, 0)
+	lbl.BackgroundTransparency = 1
+	lbl.Font = Enum.Font.GothamBold
+	lbl.TextSize = 17
+	lbl.TextColor3 = Color3.new(1, 1, 1)
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+	lbl.Text = loc.name
+	lbl.Parent = card
+
+	local tpBtn = Instance.new("TextButton")
+	tpBtn.Size = UDim2.fromOffset(78, 34)
+	tpBtn.Position = UDim2.new(1, -86, 0.5, -17)
+	tpBtn.Text = "انتقل"
+	tpBtn.Font = Enum.Font.GothamBold
+	tpBtn.TextSize = 15
+	tpBtn.BackgroundColor3 = GREEN
+	tpBtn.TextColor3 = Color3.new(1, 1, 1)
+	tpBtn.Parent = card
+	Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 10)
+
+	local thisLoc = loc
+	tpBtn.MouseButton1Click:Connect(function()
+		teleport(thisLoc.pos)
+	end)
+end
+local espEnabled = false
+local radarEnabled = false
+local alertEnabled = false
+local espLabels = {}
+local radarDots = {}
+local RADAR_RANGE = 200
+local ALERT_DIST = 50
+
+local counterLbl = Instance.new("TextLabel")
+counterLbl.Size = UDim2.new(1, 0, 0, 32)
+counterLbl.BackgroundColor3 = Color3.fromRGB(16, 19, 36)
+counterLbl.Font = Enum.Font.GothamBold
+counterLbl.TextSize = 15
+counterLbl.TextColor3 = Color3.new(1, 1, 1)
+counterLbl.TextXAlignment = Enum.TextXAlignment.Center
+counterLbl.Text = "🥚 البيض في المنطقة: ..."
+counterLbl.Parent = hiddenPage
+Instance.new("UICorner", counterLbl).CornerRadius = UDim.new(0, 10)
+
+local hiddenScroll = Instance.new("ScrollingFrame")
+hiddenScroll.Size = UDim2.new(1, 0, 1, -38)
+hiddenScroll.Position = UDim2.new(0, 0, 0, 36)
+hiddenScroll.BackgroundTransparency = 1
+hiddenScroll.BorderSizePixel = 0
+hiddenScroll.ScrollBarThickness = 3
+hiddenScroll.CanvasSize = UDim2.new(0, 0, 0, 240)
+hiddenScroll.Parent = hiddenPage
+local hlay = Instance.new("UIListLayout", hiddenScroll)
+hlay.Padding = UDim.new(0, 8)
+
+local alertStatus = Instance.new("TextLabel")
+alertStatus.Size = UDim2.new(1, 0, 0, 28)
+alertStatus.BackgroundTransparency = 1
+alertStatus.Font = Enum.Font.Gotham
+alertStatus.TextSize = 14
+alertStatus.TextColor3 = Color3.fromRGB(255, 210, 110)
+alertStatus.TextXAlignment = Enum.TextXAlignment.Left
+alertStatus.Text = ""
+alertStatus.Parent = hiddenScroll
+
+local function makeToggle(text, onToggle)
+	local card = Instance.new("Frame")
+	card.Size = UDim2.new(1, -6, 0, 52)
+	card.BackgroundColor3 = Color3.fromRGB(30, 36, 62)
+	card.Parent = hiddenScroll
+	Instance.new("UICorner", card).CornerRadius = UDim.new(0, 12)
+	local cs = Instance.new("UIStroke", card)
+	cs.Color = ACCENT
+	cs.Thickness = 1.2
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(1, -110, 1, 0)
+	lbl.Position = UDim2.new(0, 12, 0, 0)
+	lbl.BackgroundTransparency = 1
+	lbl.Font = Enum.Font.GothamBold
+	lbl.TextSize = 15
+	lbl.TextColor3 = Color3.new(1, 1, 1)
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+	lbl.TextWrapped = true
+	lbl.Text = text
+	lbl.Parent = card
+
+	local tog = Instance.new("TextButton")
+	tog.Size = UDim2.fromOffset(82, 34)
+	tog.Position = UDim2.new(1, -90, 0.5, -17)
+	tog.Text = "تشغيل"
+	tog.Font = Enum.Font.GothamBold
+	tog.TextSize = 15
+	tog.BackgroundColor3 = GREEN
+	tog.TextColor3 = Color3.new(1, 1, 1)
+	tog.Parent = card
+	Instance.new("UICorner", tog).CornerRadius = UDim.new(0, 10)
+
+	local active = false
+	tog.MouseButton1Click:Connect(function()
+		active = not active
+		tog.Text = active and "إيقاف" or "تشغيل"
+		tog.BackgroundColor3 = active and RED or GREEN
+		onToggle(active)
+	end)
+end
+
+makeToggle("👁️ ESP البيض (تشوف البيض من بعيد)", function(on)
+	espEnabled = on
+	if not on then
+		for _, l in pairs(espLabels) do
+			pcall(function() l:Destroy() end)
+		end
+		espLabels = {}
+	end
+end)
+
+makeToggle("📡 رادار البيض", function(on)
+	radarEnabled = on
+	radarFrame.Visible = on
+	if not on then
+		for _, d in pairs(radarDots) do
+			pcall(function() d:Destroy() end)
+		end
+		radarDots = {}
+	end
+end)
+
+makeToggle("🔔 تنبيه البيض القريب", function(on)
+	alertEnabled = on
+	if not on then alertStatus.Text = "" end
+end)
+
+local radarFrame = Instance.new("Frame")
+radarFrame.Size = UDim2.fromOffset(120, 120)
+radarFrame.Position = UDim2.new(1, -130, 1, -130)
+radarFrame.BackgroundColor3 = Color3.fromRGB(10, 14, 30)
+radarFrame.BackgroundTransparency = 0.3
+radarFrame.Visible = false
+radarFrame.Parent = gui
+Instance.new("UICorner", radarFrame).CornerRadius = UDim.new(0.5, 0)
+local radarStroke = Instance.new("UIStroke", radarFrame)
+radarStroke.Color = ACCENT
+radarStroke.Thickness = 2
+
+local playerDot = Instance.new("Frame")
+playerDot.Size = UDim2.fromOffset(8, 8)
+playerDot.Position = UDim2.new(0.5, -4, 0.5, -4)
+playerDot.BackgroundColor3 = Color3.fromRGB(40, 230, 120)
+playerDot.Parent = radarFrame
+Instance.new("UICorner", playerDot).CornerRadius = UDim.new(1, 0)
+
+local connections = {}
+
+local loopConn = RunService.Heartbeat:Connect(function()
+	local char = player.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	local myPos = hrp.Position
+
+	local eggs = getEggs()
+	counterLbl.Text = "🥚 البيض في المنطقة: " .. #eggs
+
+	for _, l in pairs(espLabels) do
+		pcall(function() l:Destroy() end)
+	end
+	espLabels = {}
+
+	for _, d in pairs(radarDots) do
+		pcall(function() d:Destroy() end)
+	end
+	radarDots = {}
+
+	local nearest = nil
+	local nearestDist = math.huge
+
+	for _, egg in ipairs(eggs) do
+		local pos = getPos(egg)
+		if not pos then continue end
+		local dist = (myPos - pos).Magnitude
+
+		if dist < nearestDist then
+			nearestDist = dist
+			nearest = egg
+		end
+
+		if espEnabled then
+			local adornee = egg:IsA("BasePart") and egg or (egg:IsA("Model") and egg.PrimaryPart)
+			if adornee then
+				local bb = Instance.new("BillboardGui")
+				bb.Size = UDim2.fromOffset(80, 28)
+				bb.StudsOffset = Vector3.new(0, 3, 0)
+				bb.AlwaysOnTop = true
+				bb.Adornee = adornee
+				bb.Parent = espGui
+				local txt = Instance.new("TextLabel", bb)
+				txt.Size = UDim2.new(1, 0, 1, 0)
+				txt.BackgroundTransparency = 1
+				txt.Font = Enum.Font.GothamBold
+				txt.TextSize = 13
+				txt.TextColor3 = Color3.fromRGB(255, 230, 50)
+				txt.Text = "🥚 " .. math.floor(dist) .. "m"
+				table.insert(espLabels, bb)
+			end
+		end
+
+		if radarEnabled then
+			local rel = pos - myPos
+			local rx = math.clamp(rel.X / RADAR_RANGE, -1, 1)
+			local rz = math.clamp(rel.Z / RADAR_RANGE, -1, 1)
+			local dot = Instance.new("Frame")
+			dot.Size = UDim2.fromOffset(6, 6)
+			dot.Position = UDim2.new(0.5 + rx * 0.42, -3, 0.5 + rz * 0.42, -3)
+			dot.BackgroundColor3 = Color3.fromRGB(255, 230, 50)
+			dot.Parent = radarFrame
+			Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+			table.insert(radarDots, dot)
+		end
+	end
+
+	if alertEnabled then
+		if nearest and nearestDist <= ALERT_DIST then
+			alertStatus.TextColor3 = Color3.fromRGB(110, 230, 160)
+			alertStatus.Text = "🔔 بيضة قريبة! " .. math.floor(nearestDist) .. "m"
+		elseif nearest then
+			alertStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
+			alertStatus.Text = "أقرب بيضة: " .. math.floor(nearestDist) .. "m"
+		end
+	end
+end)
+
+table.insert(connections, loopConn)
+
+gui.Destroying:Connect(function()
+	for _, c in pairs(connections) do pcall(function() c:Disconnect() end) end
+	pcall(function() espGui:Destroy() end)
+end)
+
+local openBtn = Instance.new("TextButton")
+openBtn.Size = UDim2.fromOffset(52, 52)
+openBtn.Position = UDim2.fromOffset(8, camera.ViewportSize.Y / 2 - 26)
+openBtn.Text = "🥚"
+openBtn.Font = Enum.Font.GothamBold
+openBtn.TextSize = 24
+openBtn.AutoButtonColor = false
+openBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
+openBtn.TextColor3 = Color3.new(1, 1, 1)
+openBtn.ZIndex = 100
+openBtn.Parent = gui
+Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", openBtn).Color = Color3.new(1, 1, 1)
+
+local pressing, dragging, longHeld = false, false, false
+local dragInput, startPos, btnStart
+local pressId = 0
+
+openBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch
+		or input.UserInputType == Enum.UserInputType.MouseButton1 then
+		pressing = true
+		dragging = false
+		longHeld = false
+		dragInput = input
+		startPos = input.Position
+		btnStart = openBtn.AbsolutePosition
+		pressId += 1
+		local myId = pressId
+		task.delay(4, function()
+			if pressing and not dragging and pressId == myId then
+				longHeld = true
+				showKill()
+			end
+		end)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if not pressing then return end
+	if input == dragInput or input.UserInputType == Enum.UserInputType.MouseMovement then
+		local d = input.Position - startPos
+		if not dragging and d.Magnitude > 10 then dragging = true end
+		if dragging then
+			local vp = camera.ViewportSize
+			openBtn.Position = UDim2.fromOffset(
+				math.clamp(btnStart.X + d.X, 0, vp.X - 52),
+				math.clamp(btnStart.Y + d.Y, 0, vp.Y - 52)
+			)
+		end
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if not pressing then return end
+	local same = input == dragInput
+		or (dragInput.UserInputType == Enum.UserInputType.MouseButton1
+			and input.UserInputType == Enum.UserInputType.MouseButton1)
+	if not same then return end
+	pressing = false
+	if dragging then
+		dragging = false
+	elseif not longHeld then
+		main.Visible = not main.Visible
+	end
+end)
