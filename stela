@@ -7,21 +7,25 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 local ACCENT = Color3.fromRGB(91, 61, 245)
-local BTN = Color3.fromRGB(40, 46, 80)
-local GREEN = Color3.fromRGB(40, 160, 80)
-local RED = Color3.fromRGB(200, 40, 50)
+local BTN = Color3.fromRGB(35, 42, 72)
+local GREEN = Color3.fromRGB(34, 197, 94)
+local RED = Color3.fromRGB(220, 38, 38)
+local CARD = Color3.fromRGB(20, 26, 52)
+local BG = Color3.fromRGB(13, 17, 38)
+
+local ZONE1 = Vector3.new(614.4, 73, -365.0)
 
 local LOCATIONS = {
-	{ name = "اللوبي",       pos = Vector3.new(542.2,  73, -360.2) },
-	{ name = "منطقة 1",     pos = Vector3.new(614.4,  73, -365.0) },
-	{ name = "منطقة 2",     pos = Vector3.new(719.5,  73, -363.2) },
-	{ name = "منطقة 3 🏜️", pos = Vector3.new(888.4,  73, -362.6) },
-	{ name = "منطقة 4",     pos = Vector3.new(1143.5, 73, -363.8) },
-	{ name = "منطقة 5 ❄️", pos = Vector3.new(1415.2, 73, -367.2) },
-	{ name = "منطقة 6",     pos = Vector3.new(1792.1, 73, -371.7) },
+	{ name = "🏠 اللوبي",       pos = Vector3.new(542.2,  73, -360.2) },
+	{ name = "1️⃣ منطقة 1",    pos = Vector3.new(614.4,  73, -365.0) },
+	{ name = "2️⃣ منطقة 2",    pos = Vector3.new(719.5,  73, -363.2) },
+	{ name = "🏜️ منطقة 3",    pos = Vector3.new(888.4,  73, -362.6) },
+	{ name = "4️⃣ منطقة 4",    pos = Vector3.new(1143.5, 73, -363.8) },
+	{ name = "❄️ منطقة 5",    pos = Vector3.new(1415.2, 73, -367.2) },
+	{ name = "6️⃣ منطقة 6",    pos = Vector3.new(1792.1, 73, -371.7) },
 }
 
-local EGG_KEYWORDS = { "egg", "بيض" }
+local EGG_KEYWORDS = { "egg", "بيض", "Egg" }
 
 local function isEgg(obj)
 	if not obj:IsA("BasePart") and not obj:IsA("Model") then return false end
@@ -112,87 +116,112 @@ showKill()
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0.88, 0, 0.84, 0)
 main.Position = UDim2.new(0.06, 0, 0.13, 0)
-main.BackgroundColor3 = Color3.fromRGB(24, 28, 50)
+main.BackgroundColor3 = BG
 main.Visible = true
 main.Parent = gui
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 16)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 20)
 local stroke = Instance.new("UIStroke", main)
 stroke.Color = ACCENT
 stroke.Thickness = 2
 
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 48)
+titleBar.BackgroundColor3 = Color3.fromRGB(18, 22, 45)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = main
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 20)
+
+local titleLbl = Instance.new("TextLabel")
+titleLbl.Size = UDim2.new(1, -16, 1, 0)
+titleLbl.Position = UDim2.new(0, 14, 0, 0)
+titleLbl.BackgroundTransparency = 1
+titleLbl.Font = Enum.Font.GothamBold
+titleLbl.TextSize = 20
+titleLbl.TextColor3 = Color3.new(1, 1, 1)
+titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+titleLbl.Text = "🥚 Steal an Egg"
+titleLbl.Parent = titleBar
+
 local tabBar = Instance.new("Frame")
-tabBar.Size = UDim2.new(1, 0, 0, 44)
-tabBar.BackgroundColor3 = Color3.fromRGB(16, 19, 36)
+tabBar.Size = UDim2.new(1, -16, 0, 38)
+tabBar.Position = UDim2.new(0, 8, 0, 52)
+tabBar.BackgroundColor3 = Color3.fromRGB(18, 22, 45)
 tabBar.BorderSizePixel = 0
 tabBar.Parent = main
-Instance.new("UICorner", tabBar).CornerRadius = UDim.new(0, 16)
-local tabLayout = Instance.new("UIListLayout", tabBar)
-tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.Padding = UDim.new(0, 4)
-local tabPad = Instance.new("UIPadding", tabBar)
-tabPad.PaddingLeft = UDim.new(0, 4)
-tabPad.PaddingTop = UDim.new(0, 4)
+Instance.new("UICorner", tabBar).CornerRadius = UDim.new(0, 12)
 
-local content = Instance.new("Frame")
-content.Size = UDim2.new(1, 0, 1, -50)
-content.Position = UDim2.new(0, 0, 0, 50)
-content.BackgroundTransparency = 1
-content.Parent = main
-
-local function makeTabBtn(text)
+local function makeTabBtn(text, xpos, w)
 	local b = Instance.new("TextButton")
-	b.Size = UDim2.new(0.5, -8, 0, 36)
+	b.Size = UDim2.new(w, -6, 1, -8)
+	b.Position = UDim2.new(xpos, 4, 0, 4)
 	b.BackgroundColor3 = BTN
-	b.TextColor3 = Color3.new(1, 1, 1)
+	b.TextColor3 = Color3.fromRGB(180, 185, 210)
 	b.Font = Enum.Font.GothamBold
-	b.TextSize = 14
+	b.TextSize = 13
 	b.Text = text
 	b.TextWrapped = true
 	b.Parent = tabBar
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 9)
 	return b
 end
 
-local tabTp = makeTabBtn("🗺️ التنقل")
-local tabHidden = makeTabBtn("🔍 الأشياء المخفية")
+local tabTp     = makeTabBtn("🗺️ التنقل", 0, 0.33)
+local tabHidden = makeTabBtn("🔍 المخفية", 0.33, 0.33)
+local tabAuto   = makeTabBtn("🤖 أوتوفارم", 0.66, 0.34)
+
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, -16, 1, -104)
+content.Position = UDim2.new(0, 8, 0, 98)
+content.BackgroundTransparency = 1
+content.Parent = main
 
 local tpPage = Instance.new("Frame")
-tpPage.Size = UDim2.new(1, -16, 1, -8)
-tpPage.Position = UDim2.new(0, 8, 0, 4)
+tpPage.Size = UDim2.new(1, 0, 1, 0)
 tpPage.BackgroundTransparency = 1
 tpPage.Parent = content
 
 local hiddenPage = Instance.new("Frame")
-hiddenPage.Size = UDim2.new(1, -16, 1, -8)
-hiddenPage.Position = UDim2.new(0, 8, 0, 4)
+hiddenPage.Size = UDim2.new(1, 0, 1, 0)
 hiddenPage.BackgroundTransparency = 1
 hiddenPage.Visible = false
 hiddenPage.Parent = content
 
+local autoPage = Instance.new("Frame")
+autoPage.Size = UDim2.new(1, 0, 1, 0)
+autoPage.BackgroundTransparency = 1
+autoPage.Visible = false
+autoPage.Parent = content
+
 local function switchTab(page)
-	tpPage.Visible = page == tpPage
+	tpPage.Visible     = page == tpPage
 	hiddenPage.Visible = page == hiddenPage
-	tabTp.BackgroundColor3 = page == tpPage and ACCENT or BTN
+	autoPage.Visible   = page == autoPage
+	tabTp.BackgroundColor3     = page == tpPage     and ACCENT or BTN
 	tabHidden.BackgroundColor3 = page == hiddenPage and ACCENT or BTN
+	tabAuto.BackgroundColor3   = page == autoPage   and ACCENT or BTN
+	tabTp.TextColor3     = page == tpPage     and Color3.new(1,1,1) or Color3.fromRGB(180,185,210)
+	tabHidden.TextColor3 = page == hiddenPage and Color3.new(1,1,1) or Color3.fromRGB(180,185,210)
+	tabAuto.TextColor3   = page == autoPage   and Color3.new(1,1,1) or Color3.fromRGB(180,185,210)
 end
 
 tabTp.MouseButton1Click:Connect(function() switchTab(tpPage) end)
 tabHidden.MouseButton1Click:Connect(function() switchTab(hiddenPage) end)
+tabAuto.MouseButton1Click:Connect(function() switchTab(autoPage) end)
 switchTab(tpPage)
 
 local tpStatus = Instance.new("TextLabel")
-tpStatus.Size = UDim2.new(1, 0, 0, 24)
+tpStatus.Size = UDim2.new(1, 0, 0, 26)
 tpStatus.BackgroundTransparency = 1
 tpStatus.Font = Enum.Font.Gotham
 tpStatus.TextSize = 14
-tpStatus.TextColor3 = Color3.fromRGB(255, 210, 110)
+tpStatus.TextColor3 = Color3.fromRGB(110, 230, 160)
 tpStatus.TextXAlignment = Enum.TextXAlignment.Left
 tpStatus.Text = ""
 tpStatus.Parent = tpPage
 
 local scroll = Instance.new("ScrollingFrame")
-scroll.Size = UDim2.new(1, 0, 1, -28)
-scroll.Position = UDim2.new(0, 0, 0, 26)
+scroll.Size = UDim2.new(1, 0, 1, -30)
+scroll.Position = UDim2.new(0, 0, 0, 28)
 scroll.BackgroundTransparency = 1
 scroll.BorderSizePixel = 0
 scroll.ScrollBarThickness = 3
@@ -202,55 +231,73 @@ scroll.Parent = tpPage
 local lay = Instance.new("UIListLayout", scroll)
 lay.Padding = UDim.new(0, 8)
 
-local function teleport(pos)
+local isTeleporting = false
+
+local function smoothTp(pos, statusLbl)
+	if isTeleporting then return end
 	local char = player.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
-	if hrp then
-		hrp.CFrame = CFrame.new(pos)
-		tpStatus.Text = "تم التنقل ✓"
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if not hrp or not hum then
+		if statusLbl then statusLbl.Text = "⚠️ ما قدر يتنقل" end
+		return
+	end
+	isTeleporting = true
+	if statusLbl then statusLbl.Text = "⏳ جاري التنقل..." end
+	local target = CFrame.new(pos)
+	local startCF = hrp.CFrame
+	local origSpeed = hum.WalkSpeed
+	hum.WalkSpeed = 0
+	for i = 1, 25 do
+		if not hrp or not hrp.Parent then break end
+		hrp.CFrame = startCF:Lerp(target, i / 25)
+		task.wait(0.04)
+	end
+	hum.WalkSpeed = origSpeed
+	isTeleporting = false
+	if statusLbl then
+		statusLbl.Text = "✅ تم التنقل"
 		task.delay(2, function()
-			if tpStatus.Parent then tpStatus.Text = "" end
+			if statusLbl and statusLbl.Parent then statusLbl.Text = "" end
 		end)
-	else
-		tpStatus.Text = "ما قدر يتنقل"
 	end
 end
 
 for _, loc in ipairs(LOCATIONS) do
 	local card = Instance.new("Frame")
-	card.Size = UDim2.new(1, -6, 0, 52)
-	card.BackgroundColor3 = Color3.fromRGB(30, 36, 62)
+	card.Size = UDim2.new(1, -4, 0, 56)
+	card.BackgroundColor3 = CARD
 	card.Parent = scroll
-	Instance.new("UICorner", card).CornerRadius = UDim.new(0, 12)
+	Instance.new("UICorner", card).CornerRadius = UDim.new(0, 14)
 	local cs = Instance.new("UIStroke", card)
-	cs.Color = ACCENT
-	cs.Thickness = 1.2
+	cs.Color = Color3.fromRGB(40, 50, 90)
+	cs.Thickness = 1.5
 
 	local lbl = Instance.new("TextLabel")
 	lbl.Size = UDim2.new(1, -100, 1, 0)
-	lbl.Position = UDim2.new(0, 12, 0, 0)
+	lbl.Position = UDim2.new(0, 14, 0, 0)
 	lbl.BackgroundTransparency = 1
 	lbl.Font = Enum.Font.GothamBold
-	lbl.TextSize = 17
+	lbl.TextSize = 16
 	lbl.TextColor3 = Color3.new(1, 1, 1)
 	lbl.TextXAlignment = Enum.TextXAlignment.Left
 	lbl.Text = loc.name
 	lbl.Parent = card
 
 	local tpBtn = Instance.new("TextButton")
-	tpBtn.Size = UDim2.fromOffset(78, 34)
-	tpBtn.Position = UDim2.new(1, -86, 0.5, -17)
+	tpBtn.Size = UDim2.fromOffset(76, 34)
+	tpBtn.Position = UDim2.new(1, -84, 0.5, -17)
 	tpBtn.Text = "انتقل"
 	tpBtn.Font = Enum.Font.GothamBold
 	tpBtn.TextSize = 15
-	tpBtn.BackgroundColor3 = GREEN
+	tpBtn.BackgroundColor3 = ACCENT
 	tpBtn.TextColor3 = Color3.new(1, 1, 1)
 	tpBtn.Parent = card
 	Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 10)
 
 	local thisLoc = loc
 	tpBtn.MouseButton1Click:Connect(function()
-		teleport(thisLoc.pos)
+		task.spawn(function() smoothTp(thisLoc.pos, tpStatus) end)
 	end)
 end
 local espEnabled = false
@@ -260,67 +307,82 @@ local espLabels = {}
 local radarDots = {}
 local RADAR_RANGE = 200
 local ALERT_DIST = 50
+local connections = {}
 
+local counterCard = Instance.new("Frame")
+counterCard.Size = UDim2.new(1, -4, 0, 44)
+counterCard.BackgroundColor3 = CARD
+counterCard.Parent = hiddenPage
+Instance.new("UICorner", counterCard).CornerRadius = UDim.new(0, 14)
 local counterLbl = Instance.new("TextLabel")
-counterLbl.Size = UDim2.new(1, 0, 0, 32)
-counterLbl.BackgroundColor3 = Color3.fromRGB(16, 19, 36)
+counterLbl.Size = UDim2.new(1, 0, 1, 0)
+counterLbl.BackgroundTransparency = 1
 counterLbl.Font = Enum.Font.GothamBold
 counterLbl.TextSize = 15
-counterLbl.TextColor3 = Color3.new(1, 1, 1)
-counterLbl.TextXAlignment = Enum.TextXAlignment.Center
+counterLbl.TextColor3 = Color3.fromRGB(255, 220, 60)
 counterLbl.Text = "🥚 البيض في المنطقة: ..."
-counterLbl.Parent = hiddenPage
-Instance.new("UICorner", counterLbl).CornerRadius = UDim.new(0, 10)
+counterLbl.Parent = counterCard
 
 local hiddenScroll = Instance.new("ScrollingFrame")
-hiddenScroll.Size = UDim2.new(1, 0, 1, -38)
-hiddenScroll.Position = UDim2.new(0, 0, 0, 36)
+hiddenScroll.Size = UDim2.new(1, 0, 1, -52)
+hiddenScroll.Position = UDim2.new(0, 0, 0, 50)
 hiddenScroll.BackgroundTransparency = 1
 hiddenScroll.BorderSizePixel = 0
 hiddenScroll.ScrollBarThickness = 3
-hiddenScroll.CanvasSize = UDim2.new(0, 0, 0, 240)
+hiddenScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+hiddenScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 hiddenScroll.Parent = hiddenPage
 local hlay = Instance.new("UIListLayout", hiddenScroll)
 hlay.Padding = UDim.new(0, 8)
 
-local alertStatus = Instance.new("TextLabel")
-alertStatus.Size = UDim2.new(1, 0, 0, 28)
-alertStatus.BackgroundTransparency = 1
-alertStatus.Font = Enum.Font.Gotham
-alertStatus.TextSize = 14
-alertStatus.TextColor3 = Color3.fromRGB(255, 210, 110)
-alertStatus.TextXAlignment = Enum.TextXAlignment.Left
-alertStatus.Text = ""
-alertStatus.Parent = hiddenScroll
+local alertLbl = Instance.new("TextLabel")
+alertLbl.Size = UDim2.new(1, -4, 0, 36)
+alertLbl.BackgroundColor3 = CARD
+alertLbl.Font = Enum.Font.GothamBold
+alertLbl.TextSize = 14
+alertLbl.TextColor3 = Color3.fromRGB(110, 230, 160)
+alertLbl.Text = ""
+alertLbl.Visible = false
+alertLbl.Parent = hiddenScroll
+Instance.new("UICorner", alertLbl).CornerRadius = UDim.new(0, 12)
 
-local function makeToggle(text, onToggle)
+local function makeToggle(icon, text, onToggle)
 	local card = Instance.new("Frame")
-	card.Size = UDim2.new(1, -6, 0, 52)
-	card.BackgroundColor3 = Color3.fromRGB(30, 36, 62)
+	card.Size = UDim2.new(1, -4, 0, 60)
+	card.BackgroundColor3 = CARD
 	card.Parent = hiddenScroll
-	Instance.new("UICorner", card).CornerRadius = UDim.new(0, 12)
-	local cs = Instance.new("UIStroke", card)
-	cs.Color = ACCENT
-	cs.Thickness = 1.2
+	Instance.new("UICorner", card).CornerRadius = UDim.new(0, 14)
+	Instance.new("UIStroke", card).Color = Color3.fromRGB(40, 50, 90)
+
+	local ico = Instance.new("TextLabel")
+	ico.Size = UDim2.fromOffset(36, 36)
+	ico.Position = UDim2.new(0, 12, 0.5, -18)
+	ico.BackgroundColor3 = Color3.fromRGB(30, 38, 70)
+	ico.Font = Enum.Font.GothamBold
+	ico.TextSize = 20
+	ico.TextColor3 = Color3.new(1, 1, 1)
+	ico.Text = icon
+	ico.Parent = card
+	Instance.new("UICorner", ico).CornerRadius = UDim.new(0, 10)
 
 	local lbl = Instance.new("TextLabel")
-	lbl.Size = UDim2.new(1, -110, 1, 0)
-	lbl.Position = UDim2.new(0, 12, 0, 0)
+	lbl.Size = UDim2.new(1, -130, 1, 0)
+	lbl.Position = UDim2.new(0, 56, 0, 0)
 	lbl.BackgroundTransparency = 1
 	lbl.Font = Enum.Font.GothamBold
-	lbl.TextSize = 15
-	lbl.TextColor3 = Color3.new(1, 1, 1)
+	lbl.TextSize = 14
+	lbl.TextColor3 = Color3.fromRGB(210, 215, 240)
 	lbl.TextXAlignment = Enum.TextXAlignment.Left
 	lbl.TextWrapped = true
 	lbl.Text = text
 	lbl.Parent = card
 
 	local tog = Instance.new("TextButton")
-	tog.Size = UDim2.fromOffset(82, 34)
-	tog.Position = UDim2.new(1, -90, 0.5, -17)
+	tog.Size = UDim2.fromOffset(72, 32)
+	tog.Position = UDim2.new(1, -80, 0.5, -16)
 	tog.Text = "تشغيل"
 	tog.Font = Enum.Font.GothamBold
-	tog.TextSize = 15
+	tog.TextSize = 14
 	tog.BackgroundColor3 = GREEN
 	tog.TextColor3 = Color3.new(1, 1, 1)
 	tog.Parent = card
@@ -335,52 +397,183 @@ local function makeToggle(text, onToggle)
 	end)
 end
 
-makeToggle("👁️ ESP البيض (تشوف البيض من بعيد)", function(on)
+local radarFrame = Instance.new("Frame")
+radarFrame.Size = UDim2.fromOffset(130, 130)
+radarFrame.Position = UDim2.new(1, -140, 1, -140)
+radarFrame.BackgroundColor3 = Color3.fromRGB(10, 14, 30)
+radarFrame.BackgroundTransparency = 0.25
+radarFrame.Visible = false
+radarFrame.Parent = gui
+Instance.new("UICorner", radarFrame).CornerRadius = UDim.new(0.5, 0)
+Instance.new("UIStroke", radarFrame).Color = ACCENT
+
+local radarTitle = Instance.new("TextLabel")
+radarTitle.Size = UDim2.new(1, 0, 0, 20)
+radarTitle.Position = UDim2.new(0, 0, 0, 4)
+radarTitle.BackgroundTransparency = 1
+radarTitle.Font = Enum.Font.GothamBold
+radarTitle.TextSize = 12
+radarTitle.TextColor3 = Color3.fromRGB(150, 160, 200)
+radarTitle.Text = "رادار 🥚"
+radarTitle.Parent = radarFrame
+
+local playerDot = Instance.new("Frame")
+playerDot.Size = UDim2.fromOffset(10, 10)
+playerDot.Position = UDim2.new(0.5, -5, 0.5, -5)
+playerDot.BackgroundColor3 = Color3.fromRGB(40, 230, 120)
+playerDot.ZIndex = 3
+playerDot.Parent = radarFrame
+Instance.new("UICorner", playerDot).CornerRadius = UDim.new(1, 0)
+
+makeToggle("👁️", "ESP البيض\nتشوف البيض من بعيد", function(on)
 	espEnabled = on
 	if not on then
-		for _, l in pairs(espLabels) do
-			pcall(function() l:Destroy() end)
-		end
+		for _, l in pairs(espLabels) do pcall(function() l:Destroy() end) end
 		espLabels = {}
 	end
 end)
 
-makeToggle("📡 رادار البيض", function(on)
+makeToggle("📡", "رادار البيض\nنقاط صفراء حول شخصيتك", function(on)
 	radarEnabled = on
 	radarFrame.Visible = on
 	if not on then
-		for _, d in pairs(radarDots) do
-			pcall(function() d:Destroy() end)
-		end
+		for _, d in pairs(radarDots) do pcall(function() d:Destroy() end) end
 		radarDots = {}
 	end
 end)
 
-makeToggle("🔔 تنبيه البيض القريب", function(on)
+makeToggle("🔔", "تنبيه البيض\nتنبيه لما بيضة تقترب منك", function(on)
 	alertEnabled = on
-	if not on then alertStatus.Text = "" end
+	alertLbl.Visible = on
+	if not on then alertLbl.Text = "" end
 end)
 
-local radarFrame = Instance.new("Frame")
-radarFrame.Size = UDim2.fromOffset(120, 120)
-radarFrame.Position = UDim2.new(1, -130, 1, -130)
-radarFrame.BackgroundColor3 = Color3.fromRGB(10, 14, 30)
-radarFrame.BackgroundTransparency = 0.3
-radarFrame.Visible = false
-radarFrame.Parent = gui
-Instance.new("UICorner", radarFrame).CornerRadius = UDim.new(0.5, 0)
-local radarStroke = Instance.new("UIStroke", radarFrame)
-radarStroke.Color = ACCENT
-radarStroke.Thickness = 2
+-- صفحة الأوتوفارم
+local autoEnabled = false
+local autoSpeed = 16
 
-local playerDot = Instance.new("Frame")
-playerDot.Size = UDim2.fromOffset(8, 8)
-playerDot.Position = UDim2.new(0.5, -4, 0.5, -4)
-playerDot.BackgroundColor3 = Color3.fromRGB(40, 230, 120)
-playerDot.Parent = radarFrame
-Instance.new("UICorner", playerDot).CornerRadius = UDim.new(1, 0)
+local autoCard = Instance.new("Frame")
+autoCard.Size = UDim2.new(1, -4, 0, 60)
+autoCard.BackgroundColor3 = CARD
+autoCard.Parent = autoPage
+Instance.new("UICorner", autoCard).CornerRadius = UDim.new(0, 14)
+Instance.new("UIStroke", autoCard).Color = Color3.fromRGB(40, 50, 90)
 
-local connections = {}
+local autoIco = Instance.new("TextLabel")
+autoIco.Size = UDim2.fromOffset(36, 36)
+autoIco.Position = UDim2.new(0, 12, 0.5, -18)
+autoIco.BackgroundColor3 = Color3.fromRGB(30, 38, 70)
+autoIco.Font = Enum.Font.GothamBold
+autoIco.TextSize = 20
+autoIco.Text = "🤖"
+autoIco.TextColor3 = Color3.new(1, 1, 1)
+autoIco.Parent = autoCard
+Instance.new("UICorner", autoIco).CornerRadius = UDim.new(0, 10)
+
+local autoLbl = Instance.new("TextLabel")
+autoLbl.Size = UDim2.new(1, -130, 1, 0)
+autoLbl.Position = UDim2.new(0, 56, 0, 0)
+autoLbl.BackgroundTransparency = 1
+autoLbl.Font = Enum.Font.GothamBold
+autoLbl.TextSize = 14
+autoLbl.TextColor3 = Color3.fromRGB(210, 215, 240)
+autoLbl.TextXAlignment = Enum.TextXAlignment.Left
+autoLbl.TextWrapped = true
+autoLbl.Text = "بعد السرقة ينقلك\nلمنطقة 1 تلقائياً"
+autoLbl.Parent = autoCard
+
+local autoTog = Instance.new("TextButton")
+autoTog.Size = UDim2.fromOffset(72, 32)
+autoTog.Position = UDim2.new(1, -80, 0.5, -16)
+autoTog.Text = "تشغيل"
+autoTog.Font = Enum.Font.GothamBold
+autoTog.TextSize = 14
+autoTog.BackgroundColor3 = GREEN
+autoTog.TextColor3 = Color3.new(1, 1, 1)
+autoTog.Parent = autoCard
+Instance.new("UICorner", autoTog).CornerRadius = UDim.new(0, 10)
+
+autoTog.MouseButton1Click:Connect(function()
+	autoEnabled = not autoEnabled
+	autoTog.Text = autoEnabled and "إيقاف" or "تشغيل"
+	autoTog.BackgroundColor3 = autoEnabled and RED or GREEN
+end)
+
+local speedCard = Instance.new("Frame")
+speedCard.Size = UDim2.new(1, -4, 0, 70)
+speedCard.Position = UDim2.new(0, 2, 0, 68)
+speedCard.BackgroundColor3 = CARD
+speedCard.Parent = autoPage
+Instance.new("UICorner", speedCard).CornerRadius = UDim.new(0, 14)
+Instance.new("UIStroke", speedCard).Color = Color3.fromRGB(40, 50, 90)
+
+local speedLbl = Instance.new("TextLabel")
+speedLbl.Size = UDim2.new(1, -16, 0, 26)
+speedLbl.Position = UDim2.new(0, 12, 0, 6)
+speedLbl.BackgroundTransparency = 1
+speedLbl.Font = Enum.Font.GothamBold
+speedLbl.TextSize = 14
+speedLbl.TextColor3 = Color3.fromRGB(210, 215, 240)
+speedLbl.TextXAlignment = Enum.TextXAlignment.Left
+speedLbl.Text = "⚡ السرعة (أقصى 100)"
+speedLbl.Parent = speedCard
+
+local speedBox = Instance.new("TextBox")
+speedBox.Size = UDim2.new(1, -16, 0, 32)
+speedBox.Position = UDim2.new(0, 8, 0, 32)
+speedBox.BackgroundColor3 = Color3.fromRGB(18, 22, 45)
+speedBox.Font = Enum.Font.GothamBold
+speedBox.TextSize = 16
+speedBox.TextColor3 = Color3.new(1, 1, 1)
+speedBox.PlaceholderText = "اكتب السرعة (16 افتراضي)"
+speedBox.PlaceholderColor3 = Color3.fromRGB(100, 110, 150)
+speedBox.Text = "16"
+speedBox.ClearTextOnFocus = false
+speedBox.Parent = speedCard
+Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 10)
+
+speedBox.FocusLost:Connect(function()
+	local num = tonumber(speedBox.Text)
+	if not num then
+		speedBox.Text = "16"
+		autoSpeed = 16
+	else
+		autoSpeed = math.clamp(math.floor(num), 1, 100)
+		speedBox.Text = tostring(autoSpeed)
+	end
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if hum then hum.WalkSpeed = autoSpeed end
+end)
+
+local autoStatus = Instance.new("TextLabel")
+autoStatus.Size = UDim2.new(1, -4, 0, 30)
+autoStatus.Position = UDim2.new(0, 2, 0, 146)
+autoStatus.BackgroundTransparency = 1
+autoStatus.Font = Enum.Font.Gotham
+autoStatus.TextSize = 14
+autoStatus.TextColor3 = Color3.fromRGB(110, 230, 160)
+autoStatus.TextXAlignment = Enum.TextXAlignment.Left
+autoStatus.Text = ""
+autoStatus.Parent = autoPage
+
+-- مراقبة السرقة عبر الليدربورد
+local lastEggCount = 0
+local function getEggCount()
+	local ls = player:FindFirstChild("leaderstats")
+	if not ls then return 0 end
+	for _, v in ipairs(ls:GetChildren()) do
+		if v:IsA("IntValue") or v:IsA("NumberValue") then
+			local n = v.Name:lower()
+			if n:find("egg") or n:find("بيض") or n:find("steal") or n:find("collect") then
+				return v.Value
+			end
+		end
+	end
+	return 0
+end
+
+lastEggCount = getEggCount()
 
 local loopConn = RunService.Heartbeat:Connect(function()
 	local char = player.Character
@@ -391,24 +584,17 @@ local loopConn = RunService.Heartbeat:Connect(function()
 	local eggs = getEggs()
 	counterLbl.Text = "🥚 البيض في المنطقة: " .. #eggs
 
-	for _, l in pairs(espLabels) do
-		pcall(function() l:Destroy() end)
-	end
+	for _, l in pairs(espLabels) do pcall(function() l:Destroy() end) end
 	espLabels = {}
-
-	for _, d in pairs(radarDots) do
-		pcall(function() d:Destroy() end)
-	end
+	for _, d in pairs(radarDots) do pcall(function() d:Destroy() end) end
 	radarDots = {}
 
-	local nearest = nil
-	local nearestDist = math.huge
+	local nearest, nearestDist = nil, math.huge
 
 	for _, egg in ipairs(eggs) do
 		local pos = getPos(egg)
 		if not pos then continue end
 		local dist = (myPos - pos).Magnitude
-
 		if dist < nearestDist then
 			nearestDist = dist
 			nearest = egg
@@ -418,18 +604,20 @@ local loopConn = RunService.Heartbeat:Connect(function()
 			local adornee = egg:IsA("BasePart") and egg or (egg:IsA("Model") and egg.PrimaryPart)
 			if adornee then
 				local bb = Instance.new("BillboardGui")
-				bb.Size = UDim2.fromOffset(80, 28)
-				bb.StudsOffset = Vector3.new(0, 3, 0)
+				bb.Size = UDim2.fromOffset(90, 30)
+				bb.StudsOffset = Vector3.new(0, 3.5, 0)
 				bb.AlwaysOnTop = true
 				bb.Adornee = adornee
 				bb.Parent = espGui
 				local txt = Instance.new("TextLabel", bb)
 				txt.Size = UDim2.new(1, 0, 1, 0)
-				txt.BackgroundTransparency = 1
+				txt.BackgroundColor3 = Color3.fromRGB(10, 14, 30)
+				txt.BackgroundTransparency = 0.3
 				txt.Font = Enum.Font.GothamBold
 				txt.TextSize = 13
-				txt.TextColor3 = Color3.fromRGB(255, 230, 50)
+				txt.TextColor3 = Color3.fromRGB(255, 225, 50)
 				txt.Text = "🥚 " .. math.floor(dist) .. "m"
+				Instance.new("UICorner", txt).CornerRadius = UDim.new(0, 6)
 				table.insert(espLabels, bb)
 			end
 		end
@@ -439,9 +627,10 @@ local loopConn = RunService.Heartbeat:Connect(function()
 			local rx = math.clamp(rel.X / RADAR_RANGE, -1, 1)
 			local rz = math.clamp(rel.Z / RADAR_RANGE, -1, 1)
 			local dot = Instance.new("Frame")
-			dot.Size = UDim2.fromOffset(6, 6)
-			dot.Position = UDim2.new(0.5 + rx * 0.42, -3, 0.5 + rz * 0.42, -3)
-			dot.BackgroundColor3 = Color3.fromRGB(255, 230, 50)
+			dot.Size = UDim2.fromOffset(7, 7)
+			dot.Position = UDim2.new(0.5 + rx * 0.4, -3, 0.5 + rz * 0.4, -3)
+			dot.BackgroundColor3 = Color3.fromRGB(255, 225, 50)
+			dot.ZIndex = 2
 			dot.Parent = radarFrame
 			Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
 			table.insert(radarDots, dot)
@@ -450,11 +639,28 @@ local loopConn = RunService.Heartbeat:Connect(function()
 
 	if alertEnabled then
 		if nearest and nearestDist <= ALERT_DIST then
-			alertStatus.TextColor3 = Color3.fromRGB(110, 230, 160)
-			alertStatus.Text = "🔔 بيضة قريبة! " .. math.floor(nearestDist) .. "m"
+			alertLbl.TextColor3 = Color3.fromRGB(110, 230, 160)
+			alertLbl.Text = "🔔 بيضة قريبة جداً! " .. math.floor(nearestDist) .. "m"
 		elseif nearest then
-			alertStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
-			alertStatus.Text = "أقرب بيضة: " .. math.floor(nearestDist) .. "m"
+			alertLbl.TextColor3 = Color3.fromRGB(180, 185, 210)
+			alertLbl.Text = "🥚 أقرب بيضة: " .. math.floor(nearestDist) .. "m"
+		end
+	end
+
+	if autoEnabled then
+		local cur = getEggCount()
+		if cur > lastEggCount then
+			lastEggCount = cur
+			autoStatus.Text = "🤖 تم اكتشاف سرقة! جاري الرجوع..."
+			task.spawn(function()
+				smoothTp(ZONE1, nil)
+				autoStatus.Text = "✅ رجعت لمنطقة 1"
+				task.delay(2, function()
+					if autoStatus and autoStatus.Parent then
+						autoStatus.Text = ""
+					end
+				end)
+			end)
 		end
 	end
 end)
@@ -467,18 +673,20 @@ gui.Destroying:Connect(function()
 end)
 
 local openBtn = Instance.new("TextButton")
-openBtn.Size = UDim2.fromOffset(52, 52)
-openBtn.Position = UDim2.fromOffset(8, camera.ViewportSize.Y / 2 - 26)
+openBtn.Size = UDim2.fromOffset(54, 54)
+openBtn.Position = UDim2.fromOffset(8, camera.ViewportSize.Y / 2 - 27)
 openBtn.Text = "🥚"
 openBtn.Font = Enum.Font.GothamBold
-openBtn.TextSize = 24
+openBtn.TextSize = 26
 openBtn.AutoButtonColor = false
-openBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
+openBtn.BackgroundColor3 = ACCENT
 openBtn.TextColor3 = Color3.new(1, 1, 1)
 openBtn.ZIndex = 100
 openBtn.Parent = gui
 Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", openBtn).Color = Color3.new(1, 1, 1)
+local obs = Instance.new("UIStroke", openBtn)
+obs.Color = Color3.new(1, 1, 1)
+obs.Thickness = 2
 
 local pressing, dragging, longHeld = false, false, false
 local dragInput, startPos, btnStart
@@ -512,8 +720,8 @@ UIS.InputChanged:Connect(function(input)
 		if dragging then
 			local vp = camera.ViewportSize
 			openBtn.Position = UDim2.fromOffset(
-				math.clamp(btnStart.X + d.X, 0, vp.X - 52),
-				math.clamp(btnStart.Y + d.Y, 0, vp.Y - 52)
+				math.clamp(btnStart.X + d.X, 0, vp.X - 54),
+				math.clamp(btnStart.Y + d.Y, 0, vp.Y - 54)
 			)
 		end
 	end
