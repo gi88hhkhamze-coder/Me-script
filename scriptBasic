@@ -1,8 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
-local TeleportService = game:GetService("TeleportService")
-local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
@@ -10,9 +8,20 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Stats = game:GetService("Stats")
 local player = Players.LocalPlayer
 
+local BLUE = Color3.fromRGB(60, 130, 255)
 local ACCENT = Color3.fromRGB(91, 61, 245)
 local BTN = Color3.fromRGB(40, 46, 80)
-local BLUE = Color3.fromRGB(60, 130, 255)
+local CARD = Color3.fromRGB(14, 20, 44)
+
+local SCRIPT_URL = "https://raw.githubusercontent.com/gi88hhkhamze-coder/Me-script/refs/heads/main/%D8%B3%D9%83%D8%B1%D8%A8%D8%AA%20%D9%84%D9%83%D9%84%20%D8%A7%D9%84%D9%85%D8%A7%D8%A8%D8%A7%D8%AA"
+
+local GAMES = {
+	{ name = "Time Bomb",        place = "606849621",       url = "" },
+	{ name = "MM2", place = "142823291",       url = "" },
+    { name = "Steal a egg 🥚", place ="107778070777162", url = "" },
+    { name = "Time Bomb", place = "", url = "" },
+	{ name = "Steal a Brainrot", place = "109983668079237", url = "" },
+}
 
 local function mountGui(g)
 	local tries = {
@@ -27,7 +36,6 @@ local function mountGui(g)
 			if ok2 and g.Parent then return true end
 		end
 	end
-	return false
 end
 
 local function getExecutor()
@@ -48,615 +56,6 @@ local function getPing()
 	if ok2 and p then return math.floor(p * 1000) end
 	return nil
 end
-
-local function runMenu()
-	pcall(function()
-		if _G.__MenuGui then _G.__MenuGui:Destroy() end
-	end)
-
-	local gui = Instance.new("ScreenGui")
-	gui.Name = "KillTest"
-	gui.ResetOnSpawn = false
-	gui.DisplayOrder = 1000
-	gui.IgnoreGuiInset = true
-	mountGui(gui)
-	_G.__MenuGui = gui
-
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0, 160, 0, 40)
-	btn.Position = UDim2.new(0.5, -80, 0, 8)
-	btn.Text = "إيقاف إجباري"
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 16
-	btn.BackgroundColor3 = Color3.fromRGB(200, 40, 50)
-	btn.TextColor3 = Color3.new(1, 1, 1)
-	btn.ZIndex = 200
-	btn.Visible = false
-	btn.Parent = gui
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-	btn.MouseButton1Click:Connect(function()
-		gui:Destroy()
-	end)
-
-	local killToken = 0
-	local function showKill()
-		killToken += 1
-		local my = killToken
-		btn.Visible = true
-		task.delay(5, function()
-			if killToken == my and btn.Parent then
-				btn.Visible = false
-			end
-		end)
-	end
-	showKill()
-
-	local ok, err = pcall(function()
-		local main = Instance.new("Frame")
-		main.Size = UDim2.new(0.91, 0, 0.82, 0)
-		main.Position = UDim2.new(0.045, 0, 0.14, 0)
-		main.BackgroundColor3 = Color3.fromRGB(24, 28, 50)
-		main.Parent = gui
-		Instance.new("UICorner", main).CornerRadius = UDim.new(0, 16)
-		local stroke = Instance.new("UIStroke", main)
-		stroke.Color = ACCENT
-		stroke.Thickness = 2
-
-		local openBtn = Instance.new("TextButton")
-		openBtn.Size = UDim2.fromOffset(56, 56)
-		openBtn.Position = UDim2.fromOffset(8, workspace.CurrentCamera.ViewportSize.Y / 2 - 28)
-		openBtn.Text = "☰"
-		openBtn.Font = Enum.Font.GothamBold
-		openBtn.TextSize = 26
-		openBtn.AutoButtonColor = false
-		openBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
-		openBtn.TextColor3 = Color3.new(1, 1, 1)
-		openBtn.ZIndex = 100
-		openBtn.Parent = gui
-		Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
-		local obStroke = Instance.new("UIStroke", openBtn)
-		obStroke.Color = Color3.new(1, 1, 1)
-		obStroke.Thickness = 2
-
-		local pressing, dragging, longHeld = false, false, false
-		local dragInput, startPos, btnStart
-		local pressId = 0
-
-		local function viewport()
-			return workspace.CurrentCamera.ViewportSize
-		end
-
-		openBtn.InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.Touch
-				or input.UserInputType == Enum.UserInputType.MouseButton1 then
-				pressing = true
-				dragging = false
-				longHeld = false
-				dragInput = input
-				startPos = input.Position
-				btnStart = openBtn.AbsolutePosition
-				pressId += 1
-				local myId = pressId
-				task.delay(4, function()
-					if pressing and not dragging and pressId == myId then
-						longHeld = true
-						showKill()
-					end
-				end)
-			end
-		end)
-
-		local c1 = UIS.InputChanged:Connect(function(input)
-			if not pressing then return end
-			if input == dragInput or input.UserInputType == Enum.UserInputType.MouseMovement then
-				local d = input.Position - startPos
-				if not dragging and d.Magnitude > 10 then
-					dragging = true
-				end
-				if dragging then
-					local vp = viewport()
-					local x = math.clamp(btnStart.X + d.X, 0, vp.X - 56)
-					local y = math.clamp(btnStart.Y + d.Y, 0, vp.Y - 56)
-					openBtn.Position = UDim2.fromOffset(x, y)
-				end
-			end
-		end)
-
-		local c2 = UIS.InputEnded:Connect(function(input)
-			if not pressing then return end
-			local same = input == dragInput
-				or (dragInput.UserInputType == Enum.UserInputType.MouseButton1
-					and input.UserInputType == Enum.UserInputType.MouseButton1)
-			if not same then return end
-			pressing = false
-			if dragging then
-				dragging = false
-			elseif not longHeld then
-				main.Visible = not main.Visible
-			end
-		end)
-
-		gui.Destroying:Connect(function()
-			c1:Disconnect()
-			c2:Disconnect()
-		end)
-
-		local side = Instance.new("ScrollingFrame")
-		side.Size = UDim2.new(0.28, 0, 1, 0)
-		side.BackgroundColor3 = Color3.fromRGB(16, 19, 36)
-		side.BorderSizePixel = 0
-		side.ScrollBarThickness = 4
-		side.Parent = main
-		Instance.new("UICorner", side).CornerRadius = UDim.new(0, 16)
-
-		local area = Instance.new("Frame")
-		area.Size = UDim2.new(0.68, 0, 0.92, 0)
-		area.Position = UDim2.new(0.30, 0, 0.04, 0)
-		area.BackgroundTransparency = 1
-		area.Parent = main
-
-		local header = Instance.new("TextLabel")
-		header.Size = UDim2.new(1, 0, 0, 36)
-		header.BackgroundTransparency = 1
-		header.Font = Enum.Font.GothamBold
-		header.TextSize = 26
-		header.TextColor3 = Color3.new(1, 1, 1)
-		header.TextXAlignment = Enum.TextXAlignment.Left
-		header.Text = "القائمة"
-		header.Parent = area
-
-		local line = Instance.new("Frame")
-		line.Size = UDim2.new(0, 70, 0, 4)
-		line.Position = UDim2.new(0, 0, 0, 38)
-		line.BackgroundColor3 = ACCENT
-		line.BorderSizePixel = 0
-		line.Parent = area
-		Instance.new("UICorner", line).CornerRadius = UDim.new(1, 0)
-
-		local content = Instance.new("TextLabel")
-		content.Size = UDim2.new(1, 0, 1, -52)
-		content.Position = UDim2.new(0, 0, 0, 52)
-		content.BackgroundTransparency = 1
-		content.Font = Enum.Font.Gotham
-		content.TextColor3 = Color3.fromRGB(225, 228, 245)
-		content.TextSize = 20
-		content.TextWrapped = true
-		content.TextXAlignment = Enum.TextXAlignment.Left
-		content.TextYAlignment = Enum.TextYAlignment.Top
-		content.Text = ""
-		content.Parent = area
-
-		local function makeBtn(text, x, y, w, h, parent)
-			local b = Instance.new("TextButton")
-			b.Size = UDim2.new(0, w, 0, h)
-			b.Position = UDim2.new(0, x, 0, y)
-			b.Text = text
-			b.Font = Enum.Font.GothamBold
-			b.TextSize = 16
-			b.BackgroundColor3 = BTN
-			b.TextColor3 = Color3.new(1, 1, 1)
-			b.Parent = parent
-			Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
-			return b
-		end
-
-		local function makePage()
-			local p = Instance.new("Frame")
-			p.Size = UDim2.new(1, 0, 1, -52)
-			p.Position = UDim2.new(0, 0, 0, 52)
-			p.BackgroundTransparency = 1
-			p.Visible = false
-			p.Parent = area
-			return p
-		end
-
-		local function makeText(parent, size, color, bold)
-			local l = Instance.new("TextLabel")
-			l.BackgroundTransparency = 1
-			l.Font = bold and Enum.Font.GothamBold or Enum.Font.Gotham
-			l.TextSize = size
-			l.TextColor3 = color
-			l.TextXAlignment = Enum.TextXAlignment.Left
-			l.TextWrapped = true
-			l.Parent = parent
-			return l
-		end
-
-		local stats = { speed = 16, jump = 50, gravity = workspace.Gravity }
-
-		local function applyStats()
-			local char = player.Character
-			local hum = char and char:FindFirstChildOfClass("Humanoid")
-			if hum then
-				hum.WalkSpeed = stats.speed
-				hum.UseJumpPower = true
-				hum.JumpPower = stats.jump
-			end
-			workspace.Gravity = stats.gravity
-		end
-
-		do
-			local char = player.Character
-			local hum = char and char:FindFirstChildOfClass("Humanoid")
-			if hum then
-				stats.speed = hum.WalkSpeed
-				stats.jump = hum.UseJumpPower and hum.JumpPower or 50
-			end
-		end
-		local ORIG = { speed = stats.speed, jump = stats.jump, gravity = stats.gravity }
-
-		local charConn = player.CharacterAdded:Connect(function()
-			task.wait(0.5)
-			applyStats()
-		end)
-
-		gui.Destroying:Connect(function()
-			charConn:Disconnect()
-			stats.speed, stats.jump, stats.gravity = ORIG.speed, ORIG.jump, ORIG.gravity
-			applyStats()
-		end)
-
-		local playerPage = Instance.new("ScrollingFrame")
-		playerPage.Size = UDim2.new(1, 0, 1, -52)
-		playerPage.Position = UDim2.new(0, 0, 0, 52)
-		playerPage.BackgroundTransparency = 1
-		playerPage.BorderSizePixel = 0
-		playerPage.ScrollBarThickness = 3
-		playerPage.CanvasSize = UDim2.new(0, 0, 0, 260)
-		playerPage.Visible = false
-		playerPage.Parent = area
-
-		local playerInfo = makeText(playerPage, 16, Color3.fromRGB(160, 168, 205), false)
-		playerInfo.Size = UDim2.new(1, 0, 0, 24)
-		playerInfo.Text = player.DisplayName .. "  @" .. player.Name
-
-		local valueLabels = {}
-
-		local function makeStepper(y, title, key, step, min, max)
-			local lbl = makeText(playerPage, 17, Color3.new(1, 1, 1), true)
-			lbl.Size = UDim2.new(0, 84, 0, 36)
-			lbl.Position = UDim2.new(0, 0, 0, y)
-			lbl.Text = title
-
-			local minus = makeBtn("-", 88, y, 36, 36, playerPage)
-			local val = makeText(playerPage, 17, Color3.fromRGB(255, 210, 110), true)
-			val.Size = UDim2.new(0, 56, 0, 36)
-			val.Position = UDim2.new(0, 128, 0, y)
-			val.TextXAlignment = Enum.TextXAlignment.Center
-			local plus = makeBtn("+", 188, y, 36, 36, playerPage)
-
-			local function refresh()
-				val.Text = string.format("%.0f", stats[key])
-			end
-			valueLabels[key] = refresh
-			refresh()
-
-			minus.MouseButton1Click:Connect(function()
-				stats[key] = math.max(min, stats[key] - step)
-				refresh()
-				applyStats()
-			end)
-			plus.MouseButton1Click:Connect(function()
-				stats[key] = math.min(max, stats[key] + step)
-				refresh()
-				applyStats()
-			end)
-		end
-
-		makeStepper(36, "السرعة", "speed", 8, 0, 200)
-		makeStepper(84, "النطة", "jump", 25, 0, 300)
-		makeStepper(132, "الجاذبية", "gravity", 20, 20, 300)
-
-		local resetBtn = makeBtn("إعادة الضبط", 0, 184, 160, 36, playerPage)
-		resetBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 50)
-		resetBtn.MouseButton1Click:Connect(function()
-			stats.speed, stats.jump, stats.gravity = ORIG.speed, ORIG.jump, ORIG.gravity
-			for _, refresh in pairs(valueLabels) do refresh() end
-			applyStats()
-		end)
-		local serverPage = makePage()
-
-		local info = makeText(serverPage, 18, Color3.fromRGB(225, 228, 245), false)
-		info.Size = UDim2.new(1, -100, 0, 56)
-		info.TextYAlignment = Enum.TextYAlignment.Top
-
-		local badge = Instance.new("TextLabel")
-		badge.Size = UDim2.new(0, 84, 0, 26)
-		badge.Position = UDim2.new(1, -84, 0, 0)
-		badge.BackgroundColor3 = ACCENT
-		badge.Font = Enum.Font.GothamBold
-		badge.TextColor3 = Color3.new(1, 1, 1)
-		badge.TextSize = 14
-		badge.Parent = serverPage
-		Instance.new("UICorner", badge).CornerRadius = UDim.new(0, 8)
-
-		local box = Instance.new("TextBox")
-		box.Size = UDim2.new(1, 0, 0, 40)
-		box.Position = UDim2.new(0, 0, 0, 66)
-		box.BackgroundColor3 = Color3.fromRGB(16, 19, 36)
-		box.Font = Enum.Font.Gotham
-		box.TextColor3 = Color3.new(1, 1, 1)
-		box.PlaceholderText = "اكتب اسم المستخدم"
-		box.PlaceholderColor3 = Color3.fromRGB(140, 145, 175)
-		box.Text = ""
-		box.TextSize = 18
-		box.ClearTextOnFocus = false
-		box.Parent = serverPage
-		Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
-
-		local joinBtn = makeBtn("دخول", 0, 114, 120, 40, serverPage)
-		joinBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
-
-		local status = makeText(serverPage, 16, Color3.fromRGB(255, 210, 110), false)
-		status.Size = UDim2.new(1, 0, 0, 44)
-		status.Position = UDim2.new(0, 0, 0, 162)
-		status.TextYAlignment = Enum.TextYAlignment.Top
-		status.Text = ""
-
-		joinBtn.MouseButton1Click:Connect(function()
-			local name = box.Text:gsub("%s", "")
-			if name == "" then
-				status.Text = "اكتب اسم المستخدم أول"
-				return
-			end
-			status.Text = "جاري البحث..."
-			local ok1, uid = pcall(function()
-				return Players:GetUserIdFromNameAsync(name)
-			end)
-			if not ok1 or not uid then
-				status.Text = "ما لقيت هذا المستخدم"
-				return
-			end
-			local ok2, cur, msg, pid, iid = pcall(function()
-				return TeleportService:GetPlayerPlaceInstanceAsync(uid)
-			end)
-			if not ok2 or not pid or not iid then
-				status.Text = "ما قدرت أدخل عليه. غالباً إعدادات الخصوصية عنده ما تسمح، أو هو مو داخل لعبة."
-				return
-			end
-			status.Text = "جاري الدخول..."
-			local ok3 = pcall(function()
-				TeleportService:TeleportToPlaceInstance(pid, iid, player)
-			end)
-			if not ok3 then
-				status.Text = "فشل الدخول"
-			end
-		end)
-
-		local settingsPage = makePage()
-
-		local colorBtn = makeBtn("لون الواجهة ▼", 0, 0, 170, 38, settingsPage)
-		local colorRow = Instance.new("Frame")
-		colorRow.Size = UDim2.new(1, 0, 0, 44)
-		colorRow.Position = UDim2.new(0, 0, 0, 44)
-		colorRow.BackgroundTransparency = 1
-		colorRow.Visible = false
-		colorRow.Parent = settingsPage
-
-		local transBtn = makeBtn("الشفافية ▼", 0, 100, 170, 38, settingsPage)
-		local transRow = Instance.new("Frame")
-		transRow.Size = UDim2.new(1, 0, 0, 44)
-		transRow.Position = UDim2.new(0, 0, 0, 144)
-		transRow.BackgroundTransparency = 1
-		transRow.Visible = false
-		transRow.Parent = settingsPage
-
-		local colors = {
-			Color3.fromRGB(24, 28, 50),
-			Color3.fromRGB(15, 15, 15),
-			Color3.fromRGB(60, 35, 110),
-			Color3.fromRGB(20, 70, 55),
-			Color3.fromRGB(25, 60, 120),
-			Color3.fromRGB(100, 30, 40),
-		}
-
-		for i, c in ipairs(colors) do
-			local s = makeBtn("", (i - 1) * 44, 4, 36, 36, colorRow)
-			s.BackgroundColor3 = c
-			s.MouseButton1Click:Connect(function()
-				main.BackgroundColor3 = c
-				side.BackgroundColor3 = c:Lerp(Color3.new(0, 0, 0), 0.4)
-			end)
-		end
-
-		for i, v in ipairs({ 0, 0.25, 0.5, 0.75 }) do
-			local t = makeBtn(math.floor(v * 100) .. "%", (i - 1) * 66, 4, 60, 36, transRow)
-			t.MouseButton1Click:Connect(function()
-				main.BackgroundTransparency = v
-				side.BackgroundTransparency = v
-			end)
-		end
-
-		colorBtn.MouseButton1Click:Connect(function()
-			colorRow.Visible = not colorRow.Visible
-		end)
-		transBtn.MouseButton1Click:Connect(function()
-			transRow.Visible = not transRow.Visible
-		end)
-
-		local devPage = makePage()
-
-		local avatar = Instance.new("ImageLabel")
-		avatar.Size = UDim2.new(0, 80, 0, 80)
-		avatar.BackgroundColor3 = BTN
-		avatar.Image = ""
-		avatar.Parent = devPage
-		Instance.new("UICorner", avatar).CornerRadius = UDim.new(0.5, 0)
-		local avStroke = Instance.new("UIStroke", avatar)
-		avStroke.Color = ACCENT
-		avStroke.Thickness = 2
-
-		local devName = makeText(devPage, 24, Color3.new(1, 1, 1), true)
-		devName.Size = UDim2.new(1, -96, 0, 30)
-		devName.Position = UDim2.new(0, 96, 0, 10)
-		devName.Text = "mrHamze"
-
-		local devUser = makeText(devPage, 17, Color3.fromRGB(160, 168, 205), false)
-		devUser.Size = UDim2.new(1, -96, 0, 24)
-		devUser.Position = UDim2.new(0, 96, 0, 42)
-		devUser.Text = "@gi88hhk"
-
-		local devNote = makeText(devPage, 15, Color3.fromRGB(255, 210, 110), true)
-		devNote.Size = UDim2.new(1, 0, 0, 24)
-		devNote.Position = UDim2.new(0, 0, 0, 90)
-		devNote.Text = ""
-
-		local function copyLink(link, statusLabel)
-			local copied = false
-			pcall(function()
-				if setclipboard then
-					setclipboard(link)
-					copied = true
-				elseif toclipboard then
-					toclipboard(link)
-					copied = true
-				end
-			end)
-			if copied then
-				statusLabel.TextColor3 = Color3.fromRGB(110, 230, 160)
-				statusLabel.Text = "تم نسخ الرابط"
-			else
-				statusLabel.TextColor3 = Color3.fromRGB(255, 210, 110)
-				statusLabel.Text = "النسخ مو مدعوم في المنفذ، هذا الرابط:\n" .. link
-			end
-		end
-
-		local d1 = makeBtn("نسخ رابط الدسكورد1", 0, 124, 210, 36, devPage)
-		d1.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
-
-		local d2 = makeBtn("نسخ رابط الدسكورد2", 0, 168, 210, 36, devPage)
-		d2.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
-
-		local copyStatus = makeText(devPage, 15, Color3.fromRGB(110, 230, 160), false)
-		copyStatus.Size = UDim2.new(1, 0, 0, 44)
-		copyStatus.Position = UDim2.new(0, 0, 0, 212)
-		copyStatus.TextYAlignment = Enum.TextYAlignment.Top
-		copyStatus.Text = ""
-
-		d1.MouseButton1Click:Connect(function()
-			copyLink("https://discord.gg/QHPCFfw4", copyStatus)
-		end)
-		d2.MouseButton1Click:Connect(function()
-			copyLink("https://discord.gg/AJAFJPAF7", copyStatus)
-		end)
-
-		local avatarLoaded = false
-		local function loadAvatar()
-			if avatarLoaded then return end
-			avatarLoaded = true
-			task.spawn(function()
-				local uid
-				for _, n in ipairs({ "gi88hhk", "mrHamze" }) do
-					local ok1, id = pcall(function()
-						return Players:GetUserIdFromNameAsync(n)
-					end)
-					if ok1 and id then
-						uid = id
-						break
-					end
-				end
-				if not uid then
-					devNote.Text = "ما قدرت أجيب الصورة"
-					avatarLoaded = false
-					return
-				end
-				local ok2, img = pcall(function()
-					return Players:GetUserThumbnailAsync(
-						uid,
-						Enum.ThumbnailType.HeadShot,
-						Enum.ThumbnailSize.Size150x150
-					)
-				end)
-				if ok2 and img then
-					avatar.Image = img
-				else
-					avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. uid .. "&w=150&h=150"
-				end
-			end)
-		end
-
-		local tabs = {
-			{ "اللاعب" },
-			{ "التنقل" },
-			{ "الصوت" },
-			{ "حول" },
-			{ "السيرفر" },
-			{ "الإعدادات" },
-			{ "المطور" },
-		}
-
-		local tabButtons = {}
-
-		local function show(t)
-			content.Visible = false
-			playerPage.Visible = false
-			serverPage.Visible = false
-			settingsPage.Visible = false
-			devPage.Visible = false
-			header.Text = t[1]
-
-			for name, b in pairs(tabButtons) do
-				b.BackgroundColor3 = (name == t[1]) and ACCENT or BTN
-			end
-
-			if t[1] == "اللاعب" then
-				playerPage.Visible = true
-			elseif t[1] == "السيرفر" then
-				serverPage.Visible = true
-				info.Text = "رقم الماب: " .. game.PlaceId
-					.. "\nرقم السيرفر: " .. string.sub(game.JobId, 1, 14)
-				badge.Text = "👥 " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers
-			elseif t[1] == "الإعدادات" then
-				settingsPage.Visible = true
-			elseif t[1] == "المطور" then
-				devPage.Visible = true
-				copyStatus.Text = ""
-				loadAvatar()
-			else
-				content.Visible = true
-			end
-		end
-
-		side.CanvasSize = UDim2.new(0, 0, 0, 16 + #tabs * 46)
-
-		for i, t in ipairs(tabs) do
-			local b = Instance.new("TextButton")
-			b.Size = UDim2.new(0.9, 0, 0, 38)
-			b.Position = UDim2.new(0.05, 0, 0, 8 + (i - 1) * 46)
-			b.Text = t[1]
-			b.Font = Enum.Font.GothamBold
-			b.TextSize = 17
-			b.BackgroundColor3 = BTN
-			b.TextColor3 = Color3.new(1, 1, 1)
-			b.Parent = side
-			Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
-			tabButtons[t[1]] = b
-			b.MouseButton1Click:Connect(function()
-				show(t)
-			end)
-		end
-
-		show(tabs[1])
-	end)
-
-	if not ok then
-		local e = Instance.new("TextLabel")
-		e.Size = UDim2.new(0.9, 0, 0, 120)
-		e.Position = UDim2.new(0.05, 0, 0.3, 0)
-		e.BackgroundColor3 = Color3.new(0, 0, 0)
-		e.TextColor3 = Color3.fromRGB(255, 90, 90)
-		e.TextWrapped = true
-		e.TextSize = 16
-		e.Text = "خطأ: " .. tostring(err)
-		e.Parent = gui
-	end
-end
-local GAMES = {
-	{ name = "تايم بومب",        place = "606849621",       url = "" },
-	{ name = "ام ام 2",              place = "142823291",       url = "" },
-    { name = "سرقت البيض",          place = "107778070777162",      url = "https://raw.githubusercontent.com/gi88hhkhamze-coder/Me-script/refs/heads/main/stela" },	
-{ name = "Steal a Brainrot", place = "109983668079237", url = "" },
-}
 
 local cam = workspace.CurrentCamera
 
@@ -741,11 +140,10 @@ for i = 1, 16 do
 		end
 	end)
 end
-
 local panel = Instance.new("Frame")
 panel.Size = UDim2.new(0.36, 0, 0.78, 0)
 panel.Position = UDim2.new(0.61, 0, 0.11, 0)
-panel.BackgroundColor3 = Color3.fromRGB(14, 20, 44)
+panel.BackgroundColor3 = CARD
 panel.BackgroundTransparency = 0.1
 panel.Parent = introGui
 Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 24)
@@ -753,21 +151,63 @@ local pStroke = Instance.new("UIStroke", panel)
 pStroke.Color = BLUE
 pStroke.Thickness = 3
 
-local runBtn = Instance.new("TextButton")
-runBtn.Size = UDim2.new(1, -20, 0, 52)
-runBtn.Position = UDim2.new(0, 10, 0, 10)
-runBtn.Text = "تشغيل سكربت جميع المابات"
-runBtn.Font = Enum.Font.GothamBold
-runBtn.TextSize = 18
-runBtn.TextWrapped = true
-runBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
-runBtn.TextColor3 = Color3.new(1, 1, 1)
-runBtn.Parent = panel
-Instance.new("UICorner", runBtn).CornerRadius = UDim.new(0, 16)
+local statusLbl = Instance.new("TextLabel")
+statusLbl.Size = UDim2.new(1, -20, 0, 30)
+statusLbl.Position = UDim2.new(0, 10, 0, 10)
+statusLbl.BackgroundTransparency = 1
+statusLbl.Font = Enum.Font.Gotham
+statusLbl.TextSize = 13
+statusLbl.TextColor3 = Color3.fromRGB(255, 210, 110)
+statusLbl.TextXAlignment = Enum.TextXAlignment.Left
+statusLbl.TextWrapped = true
+statusLbl.Text = ""
+statusLbl.Parent = panel
+
+local function runRemoteScript(url, btnRef)
+	if url == "" then
+		statusLbl.Text = "ضع رابط السكربت في GAMES"
+		return
+	end
+	statusLbl.Text = "⏳ جاري التحميل..."
+	if btnRef then btnRef.BackgroundColor3 = Color3.fromRGB(80, 80, 80) end
+	task.spawn(function()
+		local ok, res = pcall(function() return game:HttpGet(url) end)
+		if not ok or not res or res == "" then
+			statusLbl.Text = "❌ فشل تحميل الرابط"
+			if btnRef then btnRef.BackgroundColor3 = Color3.fromRGB(40, 90, 230) end
+			return
+		end
+		local fn, loadErr = loadstring(res)
+		if not fn then
+			statusLbl.Text = "❌ خطأ: " .. tostring(loadErr)
+			if btnRef then btnRef.BackgroundColor3 = Color3.fromRGB(40, 90, 230) end
+			return
+		end
+		local ok2, e2 = pcall(fn)
+		if ok2 then
+			closeIntro()
+		else
+			statusLbl.Text = "❌ خطأ: " .. tostring(e2)
+			if btnRef then btnRef.BackgroundColor3 = Color3.fromRGB(40, 90, 230) end
+		end
+	end)
+end
+
+local mainBtn = Instance.new("TextButton")
+mainBtn.Size = UDim2.new(1, -20, 0, 56)
+mainBtn.Position = UDim2.new(0, 10, 0, 46)
+mainBtn.Text = "تشغيل سكربت جميع المابات"
+mainBtn.Font = Enum.Font.GothamBold
+mainBtn.TextSize = 18
+mainBtn.TextWrapped = true
+mainBtn.BackgroundColor3 = ACCENT
+mainBtn.TextColor3 = Color3.new(1, 1, 1)
+mainBtn.Parent = panel
+Instance.new("UICorner", mainBtn).CornerRadius = UDim.new(0, 16)
 
 local list = Instance.new("ScrollingFrame")
-list.Size = UDim2.new(1, -20, 1, -128)
-list.Position = UDim2.new(0, 10, 0, 72)
+list.Size = UDim2.new(1, -20, 1, -166)
+list.Position = UDim2.new(0, 10, 0, 112)
 list.BackgroundTransparency = 1
 list.BorderSizePixel = 0
 list.ScrollBarThickness = 3
@@ -788,7 +228,7 @@ closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.Parent = panel
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 14)
 
-local function makeCard(title, placeId)
+local function makeCard(title, placeId, url)
 	local card = Instance.new("Frame")
 	card.Size = UDim2.new(1, -6, 0, 78)
 	card.BackgroundColor3 = Color3.fromRGB(22, 30, 62)
@@ -819,23 +259,26 @@ local function makeCard(title, placeId)
 	name.Text = title
 	name.Parent = card
 
-	local run = Instance.new("TextButton")
-	run.Size = UDim2.fromOffset(62, 38)
-	run.Position = UDim2.new(1, -70, 0.5, -19)
-	run.Text = "تشغيل"
-	run.Font = Enum.Font.GothamBold
-	run.TextSize = 15
-	run.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
-	run.TextColor3 = Color3.new(1, 1, 1)
-	run.Parent = card
-	Instance.new("UICorner", run).CornerRadius = UDim.new(0, 12)
-	return run
+	local runBtn = Instance.new("TextButton")
+	runBtn.Size = UDim2.fromOffset(62, 38)
+	runBtn.Position = UDim2.new(1, -70, 0.5, -19)
+	runBtn.Text = "تشغيل"
+	runBtn.Font = Enum.Font.GothamBold
+	runBtn.TextSize = 15
+	runBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 230)
+	runBtn.TextColor3 = Color3.new(1, 1, 1)
+	runBtn.Parent = card
+	Instance.new("UICorner", runBtn).CornerRadius = UDim.new(0, 12)
+
+	runBtn.MouseButton1Click:Connect(function()
+		runRemoteScript(url, runBtn)
+	end)
 end
 
 local infoCard = Instance.new("Frame")
 infoCard.Size = UDim2.new(0.36, 0, 0.78, 0)
 infoCard.Position = UDim2.new(0.03, 0, 0.11, 0)
-infoCard.BackgroundColor3 = Color3.fromRGB(14, 20, 44)
+infoCard.BackgroundColor3 = CARD
 infoCard.BackgroundTransparency = 0.1
 infoCard.Parent = introGui
 Instance.new("UICorner", infoCard).CornerRadius = UDim.new(0, 24)
@@ -874,19 +317,6 @@ local mapVal = infoRow(10, "الماب")
 local execVal = infoRow(80, "الهاك")
 local pingVal = infoRow(150, "البنق")
 
-local statusLbl = Instance.new("TextLabel")
-statusLbl.Size = UDim2.new(1, -28, 0, 40)
-statusLbl.Position = UDim2.new(0, 14, 1, -48)
-statusLbl.BackgroundTransparency = 1
-statusLbl.Font = Enum.Font.Gotham
-statusLbl.TextSize = 14
-statusLbl.TextColor3 = Color3.fromRGB(255, 210, 110)
-statusLbl.TextXAlignment = Enum.TextXAlignment.Left
-statusLbl.TextYAlignment = Enum.TextYAlignment.Top
-statusLbl.TextWrapped = true
-statusLbl.Text = ""
-statusLbl.Parent = infoCard
-
 execVal.Text = getExecutor()
 mapVal.Text = game.Name
 
@@ -918,47 +348,40 @@ task.spawn(function()
 	end
 end)
 
-local function runRemote(url)
-	if url == "" then
-		statusLbl.Text = "ضع رابط السكربت في قائمة GAMES"
-		return
-	end
-	statusLbl.Text = "جاري التحميل..."
+for _, g in ipairs(GAMES) do
+	makeCard(g.name, g.place, g.url)
+end
+
+local started = false
+mainBtn.MouseButton1Click:Connect(function()
+	if started then return end
+	started = true
+	mainBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+	statusLbl.Text = "⏳ جاري التحميل..."
 	task.spawn(function()
-		local ok, res = pcall(function()
-			return game:HttpGet(url)
-		end)
+		local ok, res = pcall(function() return game:HttpGet(SCRIPT_URL) end)
 		if not ok or not res or res == "" then
-			statusLbl.Text = "فشل تحميل الرابط"
+			statusLbl.Text = "❌ فشل تحميل السكربت"
+			mainBtn.BackgroundColor3 = ACCENT
+			started = false
 			return
 		end
-		local fn = loadstring(res)
+		local fn, loadErr = loadstring(res)
 		if not fn then
-			statusLbl.Text = "السكربت فيه خطأ"
+			statusLbl.Text = "❌ خطأ: " .. tostring(loadErr)
+			mainBtn.BackgroundColor3 = ACCENT
+			started = false
 			return
 		end
 		local ok2, e2 = pcall(fn)
 		if ok2 then
 			closeIntro()
 		else
-			statusLbl.Text = "خطأ: " .. tostring(e2)
+			statusLbl.Text = "❌ خطأ: " .. tostring(e2)
+			mainBtn.BackgroundColor3 = ACCENT
+			started = false
 		end
 	end)
-end
-
-for _, g in ipairs(GAMES) do
-	local run = makeCard(g.name, g.place)
-	run.MouseButton1Click:Connect(function()
-		runRemote(g.url)
-	end)
-end
-
-local started = false
-runBtn.MouseButton1Click:Connect(function()
-	if started then return end
-	started = true
-	closeIntro()
-	runMenu()
 end)
 
 closeBtn.MouseButton1Click:Connect(closeIntro)
